@@ -1,0 +1,33 @@
+/* election-results.css */
+
+#votesChart,
+#pieChart,
+#demographicsChart,
+#genderChart,
+#countryChart,
+#historicalChart,
+#ageVoteChart,
+#genderVoteChart,
+#countryVoteChart {
+  max-height: 300px;
+  width: 100%;
+  display: block;
+  margin: 0 auto;
+}
+
+.card {
+  overflow: hidden;
+}
+
+
+.chart-container {
+  height: 300px;
+  width: 100%;
+  position: relative;
+}
+
+canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}

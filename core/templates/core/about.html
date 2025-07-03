@@ -1,0 +1,134 @@
+{% extends "core/body.html" %}
+{% load static %}
+
+{% block content %}
+
+<main class="main">
+
+  <!-- Τίτλος Σελίδας -->
+  <div class="page-title dark-background" data-aos="fade" style="background-image: url('{% static "core/assets/img/about-page-title-bg.jpg" %}');">
+    <div class="container">
+      <h1>Σχετικά με το eBallot</h1>
+      <nav class="breadcrumbs">
+        <ol>
+          <li><a href="{% url 'home' %}">Αρχική</a></li>
+          <li class="current">Σχετικά</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Σχετικά με το eBallot -->
+  <section id="about" class="about section">
+    <div class="container">
+      <div class="row gy-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="col-lg-5">
+          <img src="{% static 'core/assets/img/about.jpg' %}" class="img-fluid" alt="Πλατφόρμα Ψηφοφορίας eBallot">
+        </div>
+        <div class="col-lg-7" data-aos="fade-up" data-aos-delay="200">
+          <div class="content">
+            <h3>Ασφαλής και Διαφανής Ηλεκτρονική Ψηφοφορία</h3>
+            <p>Το eBallot είναι μια εύχρηστη διαδικτυακή πλατφόρμα ψηφοφορίας σχεδιασμένη για να διευκολύνει δίκαιες, διαφανείς και προσβάσιμες εκλογές για κάθε οργανισμό.</p>
+            <ul>
+              <li><i class="bi bi-check-circle-fill"></i> <span>Απλή διεπαφή για συμμετοχή από οπουδήποτε, οποιαδήποτε στιγμή.</span></li>
+              <li><i class="bi bi-check-circle-fill"></i> <span>Ισχυρά μέτρα ασφαλείας για την ακεραιότητα και το απόρρητο της ψήφου.</span></li>
+              <li><i class="bi bi-check-circle-fill"></i> <span>Αποτελέσματα σε πραγματικό χρόνο και αναλυτικά στοιχεία για τους διαχειριστές.</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Γιατί να μας επιλέξετε -->
+  <section id="why-us" class="why-us section">
+    <div class="container">
+      <div class="row g-0">
+        <div class="col-xl-5 img-bg" data-aos="fade-up" data-aos-delay="100">
+          <img src="{% static 'core/assets/img/why-us-bg.jpg' %}" alt="Γιατί να επιλέξετε eBallot" class="img-fluid w-100">
+        </div>
+
+        <div class="col-xl-7 slides position-relative" data-aos="fade-up" data-aos-delay="200">
+          <div class="swiper init-swiper">
+            <script type="application/json" class="swiper-config">
+              {
+                "loop": true,
+                "speed": 600,
+                "autoplay": { "delay": 5000 },
+                "slidesPerView": "auto",
+                "centeredSlides": true,
+                "pagination": { "el": ".swiper-pagination", "type": "bullets", "clickable": true },
+                "navigation": { "nextEl": ".swiper-button-next", "prevEl": ".swiper-button-prev" }
+              }
+            </script>
+            <div class="swiper-wrapper">
+              <div class="swiper-slide">
+                <div class="item">
+                  <h3 class="mb-3">Ενδυναμώνουμε Οργανισμούς με Δίκαιες Εκλογές</h3>
+                  <h4 class="mb-3">Αξιόπιστη, ευέλικτη και φιλική πλατφόρμα ψηφοφορίας προσαρμοσμένη στις ανάγκες σας.</h4>
+                  <p>Με το eBallot, έχετε αυθεντικοποίηση χρηστών, εύκολη δημιουργία ψηφοδελτίων και άμεση καταμέτρηση ψήφων — όλα σε ένα μέρος.</p>
+                </div>
+              </div>
+            </div>
+            <div class="swiper-pagination"></div>
+          </div>
+          <div class="swiper-button-prev"></div>
+          <div class="swiper-button-next"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Παρότρυνση για Εγγραφή -->
+  <section id="call-to-action" class="call-to-action section dark-background">
+    <img src="{% static 'core/assets/img/cta-bg.jpg' %}" alt="Εγγραφή στο eBallot">
+    <div class="container">
+      <div class="row justify-content-center" data-aos="zoom-in" data-aos-delay="100">
+        <div class="col-xl-10">
+          <div class="text-center">
+            <h3>Έτοιμοι να απλοποιήσετε την επόμενη σας εκλογική διαδικασία;</h3>
+            <p>Ξεκινήστε με το eBallot σήμερα και ζήστε μια απλή, ασφαλή και διαφανή εμπειρία ψηφοφορίας.</p>
+            <a class="cta-btn" href="{% url 'signup' %}">Δημιουργία Λογαριασμού</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ομάδα Ανάπτυξης -->
+  <section id="team" class="team section">
+    <div class="container section-title" data-aos="fade-up">
+      <h2>Η Ομάδα Μας</h2>
+      <p>Προγραμματιστές και ειδικοί στις εκλογές, αφοσιωμένοι στη δημιουργία της καλύτερης εμπειρίας ψηφοφορίας.</p>
+    </div>
+
+    <div class="container">
+      <div class="row gy-4">
+
+        {% for member in team_members %}
+        <div class="col-lg-3 col-md-6 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:1|stringformat:'d' }}00">
+          <div class="team-member">
+            <div class="member-img">
+              <img src="{% static member.image %}" class="img-fluid" alt="{{ member.name }}">
+              <div class="social">
+                <a href="#"><i class="bi bi-twitter"></i></a>
+                <a href="#"><i class="bi bi-facebook"></i></a>
+                <a href="#"><i class="bi bi-instagram"></i></a>
+                <a href="#"><i class="bi bi-linkedin"></i></a>
+              </div>
+            </div>
+            <div class="member-info">
+              <h4>{{ member.name }}</h4>
+              <span>{{ member.position }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+{% endblock %}

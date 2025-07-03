@@ -1,0 +1,102 @@
+{% extends "core/body.html" %}
+{% load static %}
+
+{% block content %}
+
+<main class="main">
+
+  <!-- Τίτλος Σελίδας -->
+  <div class="page-title dark-background" data-aos="fade" style="background-image: url({% static 'core/assets/img/portfolio-page-title-bg.jpg' %});">
+    <div class="container">
+      <h1>Προφίλ</h1>
+      <nav class="breadcrumbs">
+        <ol>
+          <li><a href="{% url 'home' %}">Αρχική</a></li>
+          <li class="current">Προφίλ</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Ενότητα Προφίλ -->
+  <section id="profile" class="section">
+    <div class="container" data-aos="fade-up">
+
+      <!-- Βασικές Πληροφορίες -->
+      <div class="mb-4">
+        <h2>Βασικές Πληροφορίες</h2>
+        <ul>
+          <li><strong>Όνομα Χρήστη:</strong> {{ user.username }}</li>
+          <li><strong>Ονοματεπώνυμο:</strong> {{ user.get_full_name }}</li>
+          <li><strong>Email:</strong> {{ user.email }}</li>
+          <li><strong>Ρόλος:</strong> {{ user.role }}</li>
+          <li><strong>Φύλο:</strong> {{ user.gender }}</li>
+          <li><strong>Ηλικιακή Ομάδα:</strong> {{ user.age_group }}</li>
+          <li><strong>Χώρα:</strong> {{ user.country }}</li>
+          <li><strong>Περιοχή:</strong> {{ user.region }}</li>
+        </ul>
+      </div>
+
+      <!-- Ομάδες Χρηστών -->
+      <div class="mb-4">
+        <h2>Ομάδες</h2>
+        {% if user.user_groups.all %}
+          <ul>
+            {% for group in user.user_groups.all %}
+              <li>{{ group.name }}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>Δεν είστε μέλος σε καμία ομάδα.</p>
+        {% endif %}
+      </div>
+
+      <!-- Δραστηριότητα Ψηφοφορίας -->
+      <div class="mb-4">
+        <h2>Δραστηριότητα Ψηφοφορίας</h2>
+        {% if user.votes.all %}
+          <ul>
+            {% for vote in user.votes.all %}
+              <li>
+                <strong>Εκλογή:</strong> {{ vote.election.title }}<br>
+                <strong>Υποψήφιος:</strong> {{ vote.candidate.name }}<br>
+                <strong>Ημερομηνία:</strong> {{ vote.timestamp|date:"d/m/Y H:i" }}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>Δεν έχετε ψηφίσει ακόμη.</p>
+        {% endif %}
+      </div>
+
+      <!-- Προσκλήσεις -->
+      <div class="mb-4">
+        <h2>Προσκλήσεις</h2>
+        {% with invitations=user.invitation_set.all %}
+          {% if invitations %}
+            <ul>
+              {% for invitation in invitations %}
+                <li>
+                  <strong>Εκλογή:</strong> {{ invitation.election.title }}<br>
+                  <strong>Χρησιμοποιήθηκε:</strong> {{ invitation.used|yesno:"Ναι,Όχι" }}<br>
+                  <strong>Λήγει:</strong> {{ invitation.expires_at|date:"d/m/Y H:i" }}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>Δεν έχετε προσκλήσεις.</p>
+          {% endif %}
+        {% endwith %}
+      </div>
+
+      <!-- Κουμπί Επεξεργασίας -->
+      <div class="text-center mt-4">
+        <a href="{% url 'edit_profile' %}" class="btn btn-primary">Επεξεργασία Προφίλ</a>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+{% endblock %}

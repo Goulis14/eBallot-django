@@ -1,0 +1,106 @@
+{% extends "core/body.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+<main class="main">
+
+  <!-- Τίτλος Σελίδας -->
+  <div class="page-title dark-background"
+       data-aos="fade"
+       style="background-image: url({% static 'core/assets/img/contact-page-title-bg.jpg' %});">
+    <div class="container">
+      <h1>Επικοινωνία</h1>
+      <nav class="breadcrumbs">
+        <ol>
+          <li><a href="{% url 'home' %}">Αρχική</a></li>
+          <li class="current">Επικοινωνία</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Φόρμα Επικοινωνίας -->
+  <section id="contact" class="contact section">
+    <div class="container position-relative" data-aos="fade-up" data-aos-delay="100">
+      <div class="row gy-4">
+        <div class="col-lg-5">
+          <div class="info-item d-flex">
+            <i class="bi bi-geo-alt"></i>
+            <div>
+              <h3>Διεύθυνση</h3>
+              <p>Οδός Adam 108, Νέα Υόρκη, NY 535022</p>
+            </div>
+          </div>
+          <div class="info-item d-flex">
+            <i class="bi bi-telephone"></i>
+            <div>
+              <h3>Τηλέφωνο</h3>
+              <p>+1 5589 55488 55</p>
+            </div>
+          </div>
+          <div class="info-item d-flex">
+            <i class="bi bi-envelope"></i>
+            <div>
+              <h3>Email</h3>
+              <p>info@example.com</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-7">
+          <h2 class="mb-3">Στείλτε μας Μήνυμα</h2>
+
+          {% if messages %}
+            {% for m in messages %}
+              <div class="alert alert-{{ m.tags }}">{{ m }}</div>
+            {% endfor %}
+          {% endif %}
+
+          {% if form.errors %}
+            <div class="alert alert-danger">Παρακαλούμε διορθώστε τα λάθη και ξαναδοκιμάστε.</div>
+          {% endif %}
+
+          <form method="post"
+                action="{% url 'contact' %}"
+                class="php-email-form"
+                data-aos="fade-up" data-aos-delay="500">
+            {% csrf_token %}
+            <div class="row gy-4">
+
+              <div class="col-md-6">
+                <label for="{{ form.name.id_for_label }}" class="form-label">Όνομα</label>
+                {{ form.name|add_class:"form-control"|attr:"placeholder:Πληκτρολογήστε το όνομά σας" }}
+              </div>
+
+              <div class="col-md-6">
+                <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                {{ form.email|add_class:"form-control"|attr:"placeholder:example@domain.com" }}
+              </div>
+
+              <div class="col-md-12">
+                <label for="{{ form.subject.id_for_label }}" class="form-label">Θέμα</label>
+                {{ form.subject|add_class:"form-control"|attr:"placeholder:Περιγραφή θέματος" }}
+              </div>
+
+              <div class="col-md-12">
+                <label for="{{ form.message.id_for_label }}" class="form-label">Μήνυμα</label>
+                {{ form.message|add_class:"form-control"|attr:"placeholder:Γράψτε το μήνυμά σας εδώ..." }}
+              </div>
+
+              <div class="col-md-12 text-center">
+                <div class="loading" style="display: none;">Αποστολή...</div>
+                <div class="error-message" style="display: none;"></div>
+                <div class="sent-message" style="display: none;">Το μήνυμά σας στάλθηκε με επιτυχία. Ευχαριστούμε!</div>
+                <button type="submit" class="btn btn-primary">Αποστολή Μηνύματος</button>
+              </div>
+
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+{% endblock %}

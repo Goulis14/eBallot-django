@@ -1,0 +1,11 @@
+{% extends "core/body.html" %}
+{% load i18n %}
+
+{# Adds the two check-boxes after the normal fields — Django admin autofills them #}
+{% block after_field_sets %}
+    {{ block.super }}
+    <div class="form-row">
+        {{ adminform.form.auto_password }}
+        {{ adminform.form.send_emails }}
+    </div>
+{% endblock %}

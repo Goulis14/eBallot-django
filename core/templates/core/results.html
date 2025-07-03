@@ -1,0 +1,223 @@
+{% extends "core/body.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<main class="main">
+
+  {% if receipt_salts %}
+    <div class="alert alert-success">
+      <h5>Your vote receipt</h5>
+      {% for s in receipt_salts %}
+        <code class="d-block">{{ s }}</code>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Page title -->
+  <div class="page-title dark-background" data-aos="fade"
+       style="background-image:url({% static 'core/assets/img/blog-page-title-bg.jpg' %});">
+    <div class="container">
+      <h1>Election Results</h1>
+      <nav class="breadcrumbs">
+        <ol>
+          <li><a href="{% url 'home' %}">Home</a></li>
+          <li class="current">Results</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <div class="container my-4">
+
+    <!-- Turnout summary -->
+    <section class="mb-5">
+      <div class="card shadow-sm p-4">
+        <h2 class="text-primary mb-3">📊 Voter Turnout</h2>
+        <p><strong>{{ turnout_text.label_1 }}:</strong> {{ total_voters }}</p>
+        <p><strong>{{ turnout_text.label_2 }}:</strong> {{ turnout_text.voters_voted }}</p>
+        <p><strong>{{ turnout_text.label_3 }}:</strong> {{ turnout_percentage }}%</p>
+        <a href="{% url 'verify_receipt' election.id %}" class="btn btn-outline-secondary btn-sm mt-2">
+          Verify my vote
+        </a>
+      </div>
+    </section>
+console.log('candLabels raw →', candLabels, 'type', typeof candLabels);
+console.log('candVotes  raw →', candVotes,  'type', typeof candVotes);
+    <!-- Results table -->
+    <section class="mb-5">
+      <div class="card shadow-sm p-4">
+        <h2 class="text-primary mb-3">🗳️ Results Table</h2>
+        <table class="table table-striped mb-0">
+          <thead><tr><th>Candidate</th><th>Votes</th><th>%</th></tr></thead>
+          <tbody>
+            {% for r in results %}
+              <tr><td>{{ r.name }}</td><td>{{ r.votes }}</td><td>{{ r.percentage }}%</td></tr>
+            {% empty %}<tr><td colspan="3">No votes yet.</td></tr>{% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Global charts -->
+    <div class="row mb-5">
+      <div class="col-md-6 mb-4">
+        <div class="card shadow-sm p-4 h-100">
+          <h2 class="text-primary mb-3">📊 Votes Per Candidate</h2>
+          <canvas id="votesChart"></canvas>
+        </div>
+      </div>
+      <div class="col-md-6 mb-4">
+        <div class="card shadow-sm p-4 h-100">
+          <h2 class="text-primary mb-3">📈 Vote Distribution</h2>
+          <canvas id="pieChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overall demographics -->
+    <div class="row mb-5">
+      {% if gender_labels_json|length > 2 %}
+        <div class="col-md-6 mb-4">
+          <div class="card shadow-sm p-4 h-100">
+            <h2 class="text-primary mb-3">👥 Votes by Gender (overall)</h2>
+            <canvas id="genderChart"></canvas>
+          </div>
+        </div>
+      {% endif %}
+      {% if age_labels_json|length > 2 %}
+        <div class="col-md-6 mb-4">
+          <div class="card shadow-sm p-4 h-100">
+            <h2 class="text-primary mb-3">📊 Votes by Age Group (overall)</h2>
+            <canvas id="ageChart"></canvas>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Per-candidate breakdown -->
+    <div class="row mb-5">
+      <div class="col-12 mb-4">
+        <div class="card shadow-sm p-4">
+          <h2 class="text-primary mb-3">👤 Gender Breakdown per Candidate</h2>
+          <canvas id="genderPerCandidateChart"></canvas>
+        </div>
+      </div>
+      <div class="col-12 mb-4">
+        <div class="card shadow-sm p-4">
+          <h2 class="text-primary mb-3">📅 Age Group Breakdown per Candidate</h2>
+          <canvas id="agePerCandidateChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.container -->
+</main>
+
+{# ---------- SAFE JSON blobs ---------- #}
+{{ results_labels_json|json_script:"js-results-labels" }}
+{{ results_votes_json|json_script:"js-results-votes" }}
+{{ gender_labels_json|json_script:"js-gender-labels" }}
+{{ gender_counts_json|json_script:"js-gender-counts" }}
+{{ age_labels_json|json_script:"js-age-labels" }}
+{{ age_counts_json|json_script:"js-age-counts" }}
+{{ gender_per_candidate_json|json_script:"js-gender-per-cand" }}
+{{ age_per_candidate_json|json_script:"js-age-per-cand" }}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const getJSON = id => JSON.parse(document.getElementById(id).textContent || '[]');
+  const candLabels = getJSON('js-results-labels');
+  const candVotes  = getJSON('js-results-votes');
+  const gLabels    = getJSON('js-gender-labels');
+  const gCounts    = getJSON('js-gender-counts');
+  const aLabels    = getJSON('js-age-labels');
+  const aCounts    = getJSON('js-age-counts');
+  const genderData = getJSON('js-gender-per-cand');
+  const ageData    = getJSON('js-age-per-cand');
+
+  console.log('candLabels →', candLabels, 'type', typeof candLabels);
+  console.log('candVotes  →', candVotes,  'type', typeof candVotes);
+
+  Chart.register(ChartDataLabels);
+
+  new Chart(document.getElementById('votesChart'), {
+    type: 'bar',
+    data: { labels: candLabels, datasets: [{ label: 'Votes', data: candVotes }] },
+    options: {
+      indexAxis: 'y',
+      plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'right' }},
+      responsive: true,
+    }
+  });
+
+  new Chart(document.getElementById('pieChart'), {
+    type: 'pie',
+    data: { labels: candLabels, datasets: [{ data: candVotes }] },
+    options: { plugins: { legend: { position: 'bottom' } }, responsive: true }
+  });
+
+  if (gLabels.length) {
+    new Chart(document.getElementById('genderChart'), {
+      type: 'pie',
+      data: { labels: gLabels, datasets: [{ data: gCounts }] },
+      options: { plugins: { legend: { position: 'bottom' } }, responsive: true }
+    });
+  }
+
+  if (aLabels.length) {
+    new Chart(document.getElementById('ageChart'), {
+      type: 'bar',
+      data: { labels: aLabels, datasets: [{ data: aCounts }] },
+      options: {
+        indexAxis: 'y',
+        plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true } },
+        responsive: true
+      }
+    });
+  }
+
+  const candidates = Object.keys(genderData);
+  const genderCats = ['Male','Female','Prefer not to say','Unknown'];
+  const ageCats = ['18-25','26-35','36-45','46-60','60+','Unknown'];
+
+  const genderDatasets = genderCats.map(g => ({
+    label: g,
+    data: candidates.map(c => genderData[c]?.[g] || 0),
+    stack: 'gender'
+  }));
+
+  const ageDatasets = ageCats.map(a => ({
+    label: a,
+    data: candidates.map(c => ageData[c]?.[a] || 0),
+    stack: 'age'
+  }));
+
+  const stackedOpts = {
+    responsive: true,
+    plugins: { legend: { position: 'top' } },
+    scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
+  };
+
+  new Chart(document.getElementById('genderPerCandidateChart'), {
+    type: 'bar',
+    data: { labels: candidates, datasets: genderDatasets },
+    options: stackedOpts
+  });
+
+  new Chart(document.getElementById('agePerCandidateChart'), {
+    type: 'bar',
+    data: { labels: candidates, datasets: ageDatasets },
+    options: stackedOpts
+  });
+});
+</script>
+{% endblock %}
+
+

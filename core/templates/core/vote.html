@@ -1,0 +1,146 @@
+{% extends "core/body.html" %}
+{% load custom_filters %}
+{% load static %}
+
+{% block content %}
+<main class="main">
+  <!-- Page Title -->
+  <div class="page-title dark-background" data-aos="fade" style="background-image: url({% static 'core/assets/img/blog-page-title-bg.jpg' %});">
+    <div class="container">
+      <h1>Vote</h1>
+      <nav class="breadcrumbs">
+        <ol>
+          <li><a href="{% url 'home' %}">Home</a></li>
+          <li class="current">Vote</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+  <!-- End Page Title -->
+
+  <div class="container">
+    <div class="row">
+      <!-- ========================= MAIN COLUMN ========================= -->
+      <div class="col-lg-8">
+        <section id="vote-section" class="vote section">
+          <div class="container">
+            <div class="post-img mb-4">
+              <img src="https://via.placeholder.com/900x300?text=Vote+Banner" alt="Vote Banner" class="img-fluid" />
+            </div>
+
+            <h2 class="title">{{ election.title }}</h2>
+            <p>{{ election.description }}</p>
+
+            <form method="POST" action="">
+              {% csrf_token %}
+              <p class="text-muted">
+                Μπορείς να επιλέξεις έως {{ election.max_choices }} υποψηφίους.
+              </p>
+
+              <!-- render the multiple‑choice field as checkboxes -->
+              <div class="form-group">
+                {{ form.candidates }}
+              </div>
+
+              <button type="submit" class="btn btn-primary mt-3">
+                Submit Vote
+              </button>
+            </form>
+
+            {% if results %}
+            <div class="mt-5">
+              <h4>Results:</h4>
+              <ul>
+                {% for candidate in election.candidates.all %}
+                <li>
+                  {{ candidate.name }} — {{ results|get_item:candidate.id|default:"0" }}
+                  votes
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+            {% endif %}
+          </div>
+        </section>
+      </div>
+
+      <!-- ========================= SIDEBAR ========================= -->
+      <div class="col-lg-4 sidebar">
+        <div class="widgets-container">
+          <!-- Search Widget -->
+          <div class="search-widget widget-item">
+            <h3 class="widget-title">Search</h3>
+            <form method="GET" action="">
+              <label>
+                <input
+                  type="text"
+                  name="q"
+                  placeholder="Search polls..."
+                  value="{{ query|default:'' }}"
+                />
+              </label>
+              <button type="submit" title="Search"><i class="bi bi-search"></i></button>
+            </form>
+          </div>
+
+          <!-- Categories Widget -->
+          <div class="categories-widget widget-item">
+            <h3 class="widget-title">Categories</h3>
+            <ul class="mt-3">
+              {% for category in categories %}
+              <li>
+                <a href="{% url 'vote_category' category.slug %}">
+                  {{ category.name }} <span>({{ category.vote_count }})</span></a
+                >
+              </li>
+              {% empty %}
+              <li>No categories found.</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <!-- Recent Votes Widget -->
+          <div class="recent-posts-widget widget-item">
+            <h3 class="widget-title">Recent Votes</h3>
+            {% for recent_vote in recent_votes %}
+            <div class="post-item">
+              <img
+                src="https://via.placeholder.com/900x300?text=Vote+Banner"
+                alt="Vote Banner"
+                class="img-fluid"
+              />
+              <div>
+                <h4>
+                  <a href="{% url 'vote_detail' recent_vote.id %}">
+                    {{ recent_vote.title|truncatechars:50 }}
+                  </a>
+                </h4>
+                <time datetime="{{ recent_vote.start_date|date:'Y-m-d' }}">
+                  {{ recent_vote.start_date|date:"M d, Y" }}</time
+                >
+              </div>
+            </div>
+            <!-- End recent vote item-->
+            {% empty %}
+            <p>No recent votes available.</p>
+            {% endfor %}
+          </div>
+
+          <!-- Tags Widget -->
+          <div class="tags-widget widget-item">
+            <h3 class="widget-title">Tags</h3>
+            <ul>
+              {% for tag in tags %}
+              <li><a href="{% url 'vote_tag' tag.slug %}">{{ tag.name }}</a></li>
+              {% empty %}
+              <li>No tags available.</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- /sidebar col -->
+    </div>
+  </div>
+</main>
+{% endblock %}

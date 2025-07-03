@@ -1,0 +1,77 @@
+{% extends "core/body.html" %}
+{% load static %}
+
+{% block content %}
+<main class="main">
+
+  <!-- Τίτλος Σελίδας -->
+  <div class="page-title dark-background" data-aos="fade" style="background-image: url({% static "core/assets/img/blog-page-title-bg.jpg" %});">
+    <div class="container">
+      <h1>Εκλογές</h1>
+      <nav class="breadcrumbs">
+        <ol>
+          <li><a href="{% url 'home' %}">Αρχική</a></li>
+          <li class="current">Εκλογές</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row">
+
+      <div class="col-lg-8">
+        <!-- Λίστα Εκλογών -->
+        <section id="election-posts" class="blog-posts section">
+          <div class="container">
+            <div class="row gy-4">
+
+              {% for election in elections %}
+              <div class="col-lg-6">
+                <article>
+                  <div class="post-img">
+                    <img src="{% static 'core/assets/img/blog/blog-1.jpg' %}" alt="" class="img-fluid">
+                  </div>
+                  <p class="post-category">{{ election.category|default:"Γενική" }}</p>
+                  <h2 class="title">
+                    {% if user.is_authenticated %}
+                      <a href="{% url 'vote' election.pk %}">{{ election.title }}</a>
+                    {% else %}
+                      <a href="#" onclick="alert('Παρακαλούμε συνδεθείτε ή δημιουργήστε λογαριασμό για να ψηφίσετε και να δείτε τα αποτελέσματα.'); return false;">
+                        {{ election.title }}
+                      </a>
+                    {% endif %}
+                  </h2>
+                  <div class="d-flex align-items-center">
+                    <img src="{% static 'core/assets/img/blog/blog-author.jpg' %}" alt="" class="img-fluid post-author-img flex-shrink-0">
+                    <div class="post-meta">
+                      <p class="post-author">Έναρξη: {{ election.start_date }}</p>
+                      <p class="post-date">Λήξη: {{ election.end_date }}</p>
+                    </div>
+                  </div>
+                </article>
+              </div>
+              {% empty %}
+              <p>Δεν υπάρχουν διαθέσιμες εκλογές αυτή τη στιγμή.</p>
+              {% endfor %}
+
+            </div>
+          </div>
+        </section>
+        <!-- /Λίστα Εκλογών -->
+
+        <!-- Προαιρετική Σελιδοποίηση -->
+        {# Μπορείς να προσθέσεις εδώ pagination αν το χρειάζεσαι #}
+
+      </div>
+
+      <!-- Sidebar -->
+      <div class="col-lg-4 sidebar">
+        {{ block.super }}
+      </div>
+
+    </div>
+  </div>
+
+</main>
+{% endblock %}

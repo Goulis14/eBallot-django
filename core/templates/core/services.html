@@ -1,0 +1,289 @@
+{% extends "core/body.html" %}
+{% load static %}
+
+{% block content %}
+
+<main class="main">
+
+  <!-- Τίτλος Σελίδας -->
+  <div class="page-title dark-background" data-aos="fade" style="background-image: url({% static "core/assets/img/services-page-title-bg.jpg" %});">
+    <div class="container">
+      <h1>Υπηρεσίες</h1>
+      <nav class="breadcrumbs">
+        <ol>
+          <li><a href="{% url 'home' %}">Αρχική</a></li>
+          <li class="current">Υπηρεσίες</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Ενότητα Υπηρεσιών -->
+  <section id="services" class="services section">
+    <div class="container section-title" data-aos="fade-up">
+      <h2>Οι Υπηρεσίες μας</h2>
+      <p>Ασφαλείς και διαφανείς λύσεις για κάθε είδος εκλογικής διαδικασίας</p>
+    </div>
+
+    <div class="container">
+      <div class="row gy-4">
+
+        <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="100">
+          <div class="icon flex-shrink-0"><i class="bi bi-briefcase" style="color: #f57813;"></i></div>
+          <div>
+            <h4 class="title">Ολοκληρωμένες Εκλογικές Λύσεις</h4>
+            <p class="description">Υποστηρίζουμε κάθε στάδιο της διαδικασίας — από την εγγραφή έως την παρουσίαση των αποτελεσμάτων.</p>
+            <a href="#" class="readmore stretched-link"><span>Μάθετε Περισσότερα</span><i class="bi bi-arrow-right"></i></a>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="200">
+          <div class="icon flex-shrink-0"><i class="bi bi-card-checklist" style="color: #15a04a;"></i></div>
+          <div>
+            <h4 class="title">Εύκολη Ρύθμιση Ψηφοδελτίων</h4>
+            <p class="description">Δημιουργήστε και προσαρμόστε τα ψηφοδέλτια σας χωρίς τεχνικές γνώσεις.</p>
+            <a href="#" class="readmore stretched-link"><span>Μάθετε Περισσότερα</span><i class="bi bi-arrow-right"></i></a>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="300">
+          <div class="icon flex-shrink-0"><i class="bi bi-bar-chart" style="color: #d90769;"></i></div>
+          <div>
+            <h4 class="title">Ανάλυση Αποτελεσμάτων</h4>
+            <p class="description">Αποκτήστε πρόσβαση σε δεδομένα και στατιστικά των εκλογών σας σε πραγματικό χρόνο.</p>
+            <a href="#" class="readmore stretched-link"><span>Μάθετε Περισσότερα</span><i class="bi bi-arrow-right"></i></a>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="400">
+          <div class="icon flex-shrink-0"><i class="bi bi-binoculars" style="color: #15bfbc;"></i></div>
+          <div>
+            <h4 class="title">Διαφάνεια & Επαληθευσιμότητα</h4>
+            <p class="description">Πλήρης διαφάνεια με δυνατότητα ελέγχου και audit logs για κάθε ψηφοφορία.</p>
+            <a href="#" class="readmore stretched-link"><span>Μάθετε Περισσότερα</span><i class="bi bi-arrow-right"></i></a>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="500">
+          <div class="icon flex-shrink-0"><i class="bi bi-brightness-high" style="color: #f5cf13;"></i></div>
+          <div>
+            <h4 class="title">Ασφάλεια Ψήφου</h4>
+            <p class="description">Η ψήφος σας κρυπτογραφείται και διασφαλίζεται με αυθεντικοποίηση πολλαπλών επιπέδων.</p>
+            <a href="#" class="readmore stretched-link"><span>Μάθετε Περισσότερα</span><i class="bi bi-arrow-right"></i></a>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="600">
+          <div class="icon flex-shrink-0"><i class="bi bi-calendar4-week" style="color: #1335f5;"></i></div>
+          <div>
+            <h4 class="title">Εκλογές με Χρονοδιάγραμμα</h4>
+            <p class="description">Ορίστε ημερομηνίες έναρξης/λήξης και αφήστε την πλατφόρμα να αναλάβει τα υπόλοιπα.</p>
+            <a href="#" class="readmore stretched-link"><span>Μάθετε Περισσότερα</span><i class="bi bi-arrow-right"></i></a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Κάρτες Υπηρεσιών -->
+  <section id="service-cards" class="service-cards section">
+    <div class="container-fluid">
+      <div class="row gy-4">
+
+        <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+          <div class="card-item">
+            <div class="row">
+              <div class="col-xl-5">
+                <div class="card-bg"><img src="{% static "core/assets/img/cards-1.jpg" %}" alt=""></div>
+              </div>
+              <div class="col-xl-7 d-flex align-items-center">
+                <div class="card-body">
+                  <h4 class="card-title">Προσαρμογή στις Ανάγκες σας</h4>
+                  <p>Το σύστημα παραμετροποιείται ανάλογα με το μέγεθος και το είδος του οργανισμού σας.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+          <div class="card-item">
+            <div class="row">
+              <div class="col-xl-5">
+                <div class="card-bg"><img src="{% static "core/assets/img/cards-5.jpg" %}" alt=""></div>
+              </div>
+              <div class="col-xl-7 d-flex align-items-center">
+                <div class="card-body">
+                  <h4 class="card-title">Διαχείριση Ρόλων & Χρηστών</h4>
+                  <p>Καθορίστε επίπεδα πρόσβασης για διαχειριστές, ψηφοφόρους, επιτηρητές και άλλους.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6" data-aos="fade-up" data-aos-delay="300">
+          <div class="card-item">
+            <div class="row">
+              <div class="col-xl-5">
+                <div class="card-bg"><img src="{% static "core/assets/img/cards-3.jpg" %}" alt=""></div>
+              </div>
+              <div class="col-xl-7 d-flex align-items-center">
+                <div class="card-body">
+                  <h4 class="card-title">Εύκολη Χρήση</h4>
+                  <p>Η πλατφόρμα είναι σχεδιασμένη ώστε να είναι φιλική προς όλους τους χρήστες.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6" data-aos="fade-up" data-aos-delay="400">
+          <div class="card-item">
+            <div class="row">
+              <div class="col-xl-5">
+                <div class="card-bg"><img src="{% static "core/assets/img/cards-4.jpg" %}" alt=""></div>
+              </div>
+              <div class="col-xl-7 d-flex align-items-center">
+                <div class="card-body">
+                  <h4 class="card-title">Υποστήριξη & Καθοδήγηση</h4>
+                  <p>Η ομάδα μας είναι πάντα δίπλα σας για να σας βοηθήσει σε κάθε βήμα της διαδικασίας.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+ <!-- Ενότητα Μαρτυριών -->
+<section id="testimonials" class="testimonials section">
+
+  <div class="container section-title" data-aos="fade-up">
+    <h2>Μαρτυρίες</h2>
+    <p>Ανατροφοδότηση από χρήστες που εμπιστεύθηκαν το eBallot</p>
+  </div>
+
+  <div class="container" data-aos="fade-up" data-aos-delay="100">
+    <div class="swiper init-swiper">
+      <script type="application/json" class="swiper-config">
+        {
+          "loop": true,
+          "speed": 600,
+          "autoplay": {
+            "delay": 5000
+          },
+          "slidesPerView": "auto",
+          "pagination": {
+            "el": ".swiper-pagination",
+            "type": "bullets",
+            "clickable": true
+          },
+          "breakpoints": {
+            "320": {
+              "slidesPerView": 1,
+              "spaceBetween": 40
+            },
+            "1200": {
+              "slidesPerView": 3,
+              "spaceBetween": 1
+            }
+          }
+        }
+      </script>
+
+      <div class="swiper-wrapper">
+
+        <div class="swiper-slide">
+          <div class="testimonial-item">
+            <div class="stars">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+            </div>
+            <p>
+              Η εμπειρία μας με το eBallot ήταν εξαιρετική. Η διαδικασία ήταν απλή και οργανωμένη, και όλοι οι συμμετέχοντες ένιωσαν σιγουριά και ασφάλεια.
+            </p>
+            <div class="profile mt-auto">
+              <img src="{% static 'core/assets/img/testimonials/testimonials-1.jpg' %}" class="testimonial-img" alt="">
+              <h3>Saul Goodman</h3>
+              <h4>CEO &amp; Ιδρυτής</h4>
+            </div>
+          </div>
+        </div>
+
+        <div class="swiper-slide">
+          <div class="testimonial-item">
+            <div class="stars">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+            </div>
+            <p>
+              Το σύστημα είναι φιλικό προς τον χρήστη και εύκολο στη χρήση. Μπορέσαμε να οργανώσουμε τις εκλογές μας χωρίς καμία δυσκολία.
+            </p>
+            <div class="profile mt-auto">
+              <img src="{% static 'core/assets/img/testimonials/testimonials-2.jpg' %}" class="testimonial-img" alt="">
+              <h3>Sara Wilsson</h3>
+              <h4>Σχεδιάστρια</h4>
+            </div>
+          </div>
+        </div>
+
+        <div class="swiper-slide">
+          <div class="testimonial-item">
+            <div class="stars">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+            </div>
+            <p>
+              Το eBallot είναι η ιδανική λύση για οργανισμούς που θέλουν να ψηφίζουν με αξιοπιστία και ασφάλεια. Οι συμμετέχοντες ένιωσαν ότι η ψήφος τους μετράει.
+            </p>
+            <div class="profile mt-auto">
+              <img src="{% static 'core/assets/img/testimonials/testimonials-3.jpg' %}" class="testimonial-img" alt="">
+              <h3>Jena Karlis</h3>
+              <h4>Ιδιοκτήτρια Καταστήματος</h4>
+            </div>
+          </div>
+        </div>
+
+        <div class="swiper-slide">
+          <div class="testimonial-item">
+            <div class="stars">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+            </div>
+            <p>
+              Το eBallot προσφέρει μια απίστευτα ευέλικτη και αξιόπιστη πλατφόρμα ψηφοφορίας. Το υποστηρικτικό προσωπικό ήταν πάντα διαθέσιμο όταν το χρειαστήκαμε.
+            </p>
+            <div class="profile mt-auto">
+              <img src="{% static 'core/assets/img/testimonials/testimonials-4.jpg' %}" class="testimonial-img" alt="">
+              <h3>Matt Brandon</h3>
+              <h4>Freelancer</h4>
+            </div>
+          </div>
+        </div>
+
+        <div class="swiper-slide">
+          <div class="testimonial-item">
+            <div class="stars">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+            </div>
+            <p>
+              Είχαμε μια ομαλή εμπειρία με το eBallot. Οι εκλογές μας έγιναν με ακρίβεια και χωρίς καμία τεχνική δυσκολία.
+            </p>
+            <div class="profile mt-auto">
+              <img src="{% static 'core/assets/img/testimonials/testimonials-5.jpg' %}" class="testimonial-img" alt="">
+              <h3>John Larson</h3>
+              <h4>Επιχειρηματίας</h4>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="swiper-pagination"></div>
+    </div>
+  </div>
+</section>
+
+
+</main>
+
+{% endblock %}

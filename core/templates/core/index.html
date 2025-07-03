@@ -1,0 +1,301 @@
+{% extends "core/body.html" %}
+{% load static %}
+
+{% block content %}
+<body class="index-page">
+
+  <main class="main">
+
+    <!-- =====================  Hero Section  ===================== -->
+    <section id="hero" class="hero section dark-background">
+      <img src="{% static 'core/assets/img/hero-bg.jpg' %}" alt="" data-aos="fade-in">
+
+      <div class="container">
+        <div class="row">
+          <div class="col-xl-4">
+            <h1 data-aos="fade-up">Ασφαλής &amp; Διαφανής Ηλεκτρονική Ψηφοφορία</h1>
+            <blockquote data-aos="fade-up" data-aos-delay="100">
+              <p>Διεξάγετε αξιόπιστες εκλογές με σιγουριά. Το eBallot προσφέρει εργαλεία για ασφαλή ψηφοφορία, αποτελέσματα σε πραγματικό χρόνο και απρόσκοπτη διαχείριση.</p>
+            </blockquote>
+
+            <div class="d-flex" data-aos="fade-up" data-aos-delay="200">
+              <a href="{% url 'signup' %}" class="btn-get-started">Ξεκινήστε</a>
+              <a href="https://www.youtube.com/watch?v=Y7f98aduVJ8"
+                 class="glightbox btn-watch-video d-flex align-items-center">
+                <i class="bi bi-play-circle"></i><span>Δείτε Βίντεο</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- /Hero -->
+
+    {% if user.is_authenticated %}
+    <!-- =================  Welcome (Logged-in)  ================= -->
+    <section id="welcome" class="section">
+      <div class="container text-center">
+        <h2>Καλώς ήρθες, {{ user.first_name }}! Πώς είσαι σήμερα;</h2>
+        <p>Δες τις εκλογές που είναι ανοιχτές για σένα.</p>
+
+        <div class="d-flex justify-content-center mt-3">
+          <a href="{% url 'profile' %}" class="btn btn-primary me-2">Το Προφίλ Μου</a>
+          <a href="{% url 'election_list' %}" class="btn btn-success">Προβολή Εκλογών</a>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    <!-- =====================  Why Us Section  ===================== -->
+    <section id="why-us" class="why-us section">
+      <div class="container">
+        <div class="row g-0">
+
+          <div class="col-xl-5 img-bg" data-aos="fade-up" data-aos-delay="100">
+            <img src="{% static 'core/assets/img/why-us-bg.jpg' %}" alt="">
+          </div>
+
+          <div class="col-xl-7 slides position-relative" data-aos="fade-up" data-aos-delay="200">
+            <div class="swiper init-swiper">
+              <script type="application/json" class="swiper-config">
+              {
+                "loop": true,
+                "speed": 600,
+                "autoplay": { "delay": 5000 },
+                "slidesPerView": "auto",
+                "centeredSlides": true,
+                "pagination": { "el": ".swiper-pagination",
+                                "type": "bullets",
+                                "clickable": true },
+                "navigation": { "nextEl": ".swiper-button-next",
+                                "prevEl": ".swiper-button-prev" }
+              }
+              </script>
+
+              <div class="swiper-wrapper">
+
+                <div class="swiper-slide">
+                  <div class="item">
+                    <h3 class="mb-3">Χτισμένο σε Εμπιστοσύνη και Ασφάλεια</h3>
+                    <h4 class="mb-3">Η ψήφος σας κρυπτογραφείται άκρη-σε-άκρη.</h4>
+                    <p>Χρησιμοποιούμε προηγμένη κρυπτογράφηση και αυθεντικοποίηση, εξασφαλίζοντας ότι κάθε ψήφος παραμένει ασφαλής, αδιάβλητη και επαληθεύσιμη.</p>
+                  </div>
+                </div>
+
+                <div class="swiper-slide">
+                  <div class="item">
+                    <h3 class="mb-3">Διαφάνεια σε Πραγματικό Χρόνο</h3>
+                    <h4 class="mb-3">Δείτε ζωντανά αποτελέσματα καθώς καταχωρούνται οι ψήφοι.</h4>
+                    <p>Η διαφάνεια χτίζει εμπιστοσύνη. Παρακολουθήστε την πορεία και αποκτήστε πρόσβαση σε audit-logs ανά πάσα στιγμή.</p>
+                  </div>
+                </div>
+
+                <div class="swiper-slide">
+                  <div class="item">
+                    <h3 class="mb-3">Απλή Διαχείριση Εκλογών</h3>
+                    <h4 class="mb-3">Δημιουργία, έναρξη και παρακολούθηση χωρίς τεχνικές γνώσεις.</h4>
+                    <p>Ρυθμίστε ψηφοδέλτια, ορίστε χρονοδιαγράμματα και κλείστε αποτελέσματα με λίγα κλικ.</p>
+                  </div>
+                </div>
+
+                <div class="swiper-slide">
+                  <div class="item">
+                    <h3 class="mb-3">Σχεδιασμένο για Κάθε Οργάνωση</h3>
+                    <h4 class="mb-3">Κλιμακώνεται για σχολεία, συλλόγους, εταιρείες κ.λπ.</h4>
+                    <p>Το eBallot προσαρμόζεται στις ανάγκες σας — μικρές ή μεγάλες.</p>
+                  </div>
+                </div>
+
+              </div>
+              <div class="swiper-pagination"></div>
+            </div>
+
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+    <!-- /Why Us -->
+
+    <!-- =====================  Services Section  ===================== -->
+    <section id="services" class="services section">
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Τι Προσφέρουμε</h2>
+        <p>Ασφαλείς, διαφανείς και αποδοτικές λύσεις ψηφοφορίας.</p>
+      </div>
+
+      <div class="container">
+        <div class="row gy-4">
+
+          <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="100">
+            <div class="icon flex-shrink-0"><i class="bi bi-shield-lock" style="color:#f57813;"></i></div>
+            <div>
+              <h4 class="title">Ασφαλής Ψηφοφορία</h4>
+              <p class="description">Κρυπτογράφηση, αυθεντικοποίηση και ακεραιότητα δεδομένων για πλήρη εμπιστοσύνη.</p>
+              <a href="#" class="readmore stretched-link"><span>Μάθετε Περισσότερα</span><i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="200">
+            <div class="icon flex-shrink-0"><i class="bi bi-graph-up" style="color:#15a04a;"></i></div>
+            <div>
+              <h4 class="title">Διαφανή Αποτελέσματα</h4>
+              <p class="description">Αποτελέσματα σε πραγματικό χρόνο και πλήρη ίχνη ελέγχου.</p>
+              <a href="#" class="readmore stretched-link"><span>Μάθετε Περισσότερα</span><i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="300">
+            <div class="icon flex-shrink-0"><i class="bi bi-gear" style="color:#d90769;"></i></div>
+            <div>
+              <h4 class="title">Εύκολη Ρύθμιση</h4>
+              <p class="description">Ξεκινήστε εκλογές σε λίγα λεπτά με διαισθητικά εργαλεία.</p>
+              <a href="#" class="readmore stretched-link"><span>Μάθετε Περισσότερα</span><i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="400">
+            <div class="icon flex-shrink-0"><i class="bi bi-people" style="color:#15bfbc;"></i></div>
+            <div>
+              <h4 class="title">Εμπλοκή Ψηφοφόρων</h4>
+              <p class="description">Υπενθυμίσεις, απλές οδηγίες και mobile-friendly ψηφοδέλτια αυξάνουν τη συμμετοχή.</p>
+              <a href="#" class="readmore stretched-link"><span>Μάθετε Περισσότερα</span><i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="500">
+            <div class="icon flex-shrink-0"><i class="bi bi-columns-gap" style="color:#f5cf13;"></i></div>
+            <div>
+              <h4 class="title">Πίνακας Διαχείρισης</h4>
+              <p class="description">Διαχειριστείτε χρήστες, παρακολουθήστε δραστηριότητα και ελέγξτε τα πάντα από ένα σημείο.</p>
+              <a href="#" class="readmore stretched-link"><span>Μάθετε Περισσότερα</span><i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="600">
+            <div class="icon flex-shrink-0"><i class="bi bi-cloud-check" style="color:#1335f5;"></i></div>
+            <div>
+              <h4 class="title">Πρόσβαση από Cloud</h4>
+              <p class="description">Ψηφίστε και διαχειριστείτε εκλογές οπουδήποτε, οποτεδήποτε — 100 % online.</p>
+              <a href="#" class="readmore stretched-link"><span>Μάθετε Περισσότερα</span><i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+    <!-- /Services -->
+
+    <!-- =====================  Call To Action  ===================== -->
+    <section id="call-to-action" class="call-to-action section dark-background">
+      <img src="{% static 'core/assets/img/vote-1804596_960_720.jpg' %}" alt="Secure Voting Background">
+
+      <div class="container">
+        <div class="row justify-content-center" data-aos="zoom-in" data-aos-delay="100">
+          <div class="col-xl-10 text-center">
+            <h3>Έτοιμοι για την Επόμενη Ασφαλή Ψηφοφορία;</h3>
+            <p>Χιλιάδες οργανισμοί εμπιστεύονται το eBallot για διαφανείς, αξιόπιστες και εύκολες online εκλογές.</p>
+            <a class="cta-btn" href="{% url 'signup' %}">Ξεκινήστε Τώρα</a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- /CTA -->
+
+    <!-- =====================  Features Section  ===================== -->
+    <section id="features" class="features section">
+      <div class="container">
+        <div class="row">
+
+          <div class="col-lg-7" data-aos="fade-up" data-aos-delay="100">
+            <h3 class="mb-0">Ισχυρές Δυνατότητες για</h3>
+            <h3>Τις Εκλογές Σας</h3>
+
+            <div class="row gy-4">
+
+              <div class="col-md-6">
+                <div class="icon-list d-flex">
+                  <i class="bi bi-shield-lock" style="color:#ff8b2c;"></i>
+                  <span>Κρυπτογράφηση E2E</span>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="icon-list d-flex">
+                  <i class="bi bi-bar-chart-line" style="color:#5578ff;"></i>
+                  <span>Αποτελέσματα &amp; Analytics σε Πραγματικό Χρόνο</span>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="icon-list d-flex">
+                  <i class="bi bi-person-check" style="color:#e80368;"></i>
+                  <span>Αυθεντικοποίηση Ψηφοφόρου</span>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="icon-list d-flex">
+                  <i class="bi bi-globe" style="color:#ffa76e;"></i>
+                  <span>Πρόσβαση Παντού</span>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="icon-list d-flex">
+                  <i class="bi bi-people" style="color:#11dbcf;"></i>
+                  <span>Πολλαπλοί Ρόλοι &amp; Δικαιώματα</span>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="icon-list d-flex">
+                  <i class="bi bi-file-earmark-check" style="color:#4233ff;"></i>
+                  <span>Ίχνη Ελέγχου</span>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="icon-list d-flex">
+                  <i class="bi bi-gear" style="color:#29cc61;"></i>
+                  <span>Εύκολη Διαχείριση</span>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="icon-list d-flex">
+                  <i class="bi bi-phone" style="color:#ff5828;"></i>
+                  <span>Φιλικό σε Κινητά</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="col-lg-5 position-relative" data-aos="zoom-out" data-aos-delay="200">
+            <div class="phone-wrap">
+              <img src="{% static 'core/assets/img/shutterstock_234376006.jpg' %}" alt="eBallot Mobile Interface" class="img-fluid">
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Details Stripe -->
+      <div class="details">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-6" data-aos="fade-up" data-aos-delay="300">
+              <h4>Διαφανές. Ασφαλές.<br>Ενδυναμώνοντας την Ψήφο Σας.</h4>
+              <p>Με τα καινοτόμα χαρακτηριστικά του eBallot, η διαχείριση και η συμμετοχή σε εκλογές δεν ήταν ποτέ πιο εύκολη και αξιόπιστη.</p>
+              <a href="{% url 'about' %}" class="btn-get-started">Μάθετε Περισσότερα</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+{% endblock %}
