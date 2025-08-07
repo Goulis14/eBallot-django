@@ -7,7 +7,7 @@
 
   {% if receipt_salts %}
     <div class="alert alert-success">
-      <h5>Your vote receipt</h5>
+      <h5>Απόδειξη της ψήφου σας</h5>
       {% for s in receipt_salts %}
         <code class="d-block">{{ s }}</code>
       {% endfor %}
@@ -18,11 +18,11 @@
   <div class="page-title dark-background" data-aos="fade"
        style="background-image:url({% static 'core/assets/img/blog-page-title-bg.jpg' %});">
     <div class="container">
-      <h1>Election Results</h1>
+      <h1>Αποτελέσματα Εκλογών</h1>
       <nav class="breadcrumbs">
         <ol>
-          <li><a href="{% url 'home' %}">Home</a></li>
-          <li class="current">Results</li>
+          <li><a href="{% url 'home' %}">Αρχική</a></li>
+          <li class="current">Αποτελέσματα</li>
         </ol>
       </nav>
     </div>
@@ -33,12 +33,12 @@
     <!-- Turnout summary -->
     <section class="mb-5">
       <div class="card shadow-sm p-4">
-        <h2 class="text-primary mb-3">📊 Voter Turnout</h2>
+        <h2 class="text-primary mb-3">📊 Συμμετοχή Ψηφοφόρων</h2>
         <p><strong>{{ turnout_text.label_1 }}:</strong> {{ total_voters }}</p>
         <p><strong>{{ turnout_text.label_2 }}:</strong> {{ turnout_text.voters_voted }}</p>
         <p><strong>{{ turnout_text.label_3 }}:</strong> {{ turnout_percentage }}%</p>
         <a href="{% url 'verify_receipt' election.id %}" class="btn btn-outline-secondary btn-sm mt-2">
-          Verify my vote
+          Έλεγχος της ψήφου μου
         </a>
       </div>
     </section>
@@ -47,13 +47,13 @@ console.log('candVotes  raw →', candVotes,  'type', typeof candVotes);
     <!-- Results table -->
     <section class="mb-5">
       <div class="card shadow-sm p-4">
-        <h2 class="text-primary mb-3">🗳️ Results Table</h2>
+        <h2 class="text-primary mb-3">🗳️ Πίνακας Αποτελεσμάτων</h2>
         <table class="table table-striped mb-0">
-          <thead><tr><th>Candidate</th><th>Votes</th><th>%</th></tr></thead>
+          <thead><tr><th>Υποψήφιος</th><th>Ψήφοι</th><th>%</th></tr></thead>
           <tbody>
             {% for r in results %}
               <tr><td>{{ r.name }}</td><td>{{ r.votes }}</td><td>{{ r.percentage }}%</td></tr>
-            {% empty %}<tr><td colspan="3">No votes yet.</td></tr>{% endfor %}
+            {% empty %}<tr><td colspan="3">Δεν υπάρχουν ακόμα ψήφοι.</td></tr>{% endfor %}
           </tbody>
         </table>
       </div>
@@ -63,13 +63,13 @@ console.log('candVotes  raw →', candVotes,  'type', typeof candVotes);
     <div class="row mb-5">
       <div class="col-md-6 mb-4">
         <div class="card shadow-sm p-4 h-100">
-          <h2 class="text-primary mb-3">📊 Votes Per Candidate</h2>
+          <h2 class="text-primary mb-3">📊 Ψήφοι ανά Υποψήφιο</h2>
           <canvas id="votesChart"></canvas>
         </div>
       </div>
       <div class="col-md-6 mb-4">
         <div class="card shadow-sm p-4 h-100">
-          <h2 class="text-primary mb-3">📈 Vote Distribution</h2>
+          <h2 class="text-primary mb-3">📈 Κατανομή Ψήφων</h2>
           <canvas id="pieChart"></canvas>
         </div>
       </div>
@@ -80,7 +80,7 @@ console.log('candVotes  raw →', candVotes,  'type', typeof candVotes);
       {% if gender_labels_json|length > 2 %}
         <div class="col-md-6 mb-4">
           <div class="card shadow-sm p-4 h-100">
-            <h2 class="text-primary mb-3">👥 Votes by Gender (overall)</h2>
+            <h2 class="text-primary mb-3">👥 Ψήφοι ανά Φύλο (συνολικά)</h2>
             <canvas id="genderChart"></canvas>
           </div>
         </div>
@@ -88,7 +88,7 @@ console.log('candVotes  raw →', candVotes,  'type', typeof candVotes);
       {% if age_labels_json|length > 2 %}
         <div class="col-md-6 mb-4">
           <div class="card shadow-sm p-4 h-100">
-            <h2 class="text-primary mb-3">📊 Votes by Age Group (overall)</h2>
+            <h2 class="text-primary mb-3">📊 Ψήφοι ανά Ηλικιακή Ομάδα (συνολικά)</h2>
             <canvas id="ageChart"></canvas>
           </div>
         </div>
@@ -99,13 +99,13 @@ console.log('candVotes  raw →', candVotes,  'type', typeof candVotes);
     <div class="row mb-5">
       <div class="col-12 mb-4">
         <div class="card shadow-sm p-4">
-          <h2 class="text-primary mb-3">👤 Gender Breakdown per Candidate</h2>
+          <h2 class="text-primary mb-3">👤 Ανάλυση Φύλου ανά Υποψήφιο</h2>
           <canvas id="genderPerCandidateChart"></canvas>
         </div>
       </div>
       <div class="col-12 mb-4">
         <div class="card shadow-sm p-4">
-          <h2 class="text-primary mb-3">📅 Age Group Breakdown per Candidate</h2>
+          <h2 class="text-primary mb-3">📅 Ανάλυση Ηλικιών ανά Υποψήφιο</h2>
           <canvas id="agePerCandidateChart"></canvas>
         </div>
       </div>
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   new Chart(document.getElementById('votesChart'), {
     type: 'bar',
-    data: { labels: candLabels, datasets: [{ label: 'Votes', data: candVotes }] },
+    data: { labels: candLabels, datasets: [{ label: 'Ψήφοι', data: candVotes }] },
     options: {
       indexAxis: 'y',
       plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'right' }},
@@ -219,5 +219,3 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 {% endblock %}
-
-

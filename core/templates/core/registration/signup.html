@@ -1,7 +1,7 @@
 {% extends "core/body.html" %}
 {% load static %}
 
-{% block title %}Sign Up{% endblock %}
+{% block title %}Εγγραφή{% endblock %}
 
 {% block content %}
 <section id="hero" class="hero section dark-background">
@@ -11,14 +11,14 @@
 <div class="container">
   <div class="row">
     <div class="col-xl-6" style="max-width: 450px; padding-right: 3rem;">
-      <h1 data-aos="fade-up">Create Your Account</h1>
+      <h1 data-aos="fade-up">Δημιούργησε Λογαριασμό</h1>
       <blockquote data-aos="fade-up" data-aos-delay="100">
-        <p>Join our secure and transparent online voting platform. Get started today.</p>
+        <p>Γίνε μέλος της ασφαλούς και διαφανούς ηλεκτρονικής πλατφόρμας ψηφοφορίας μας. Ξεκίνα σήμερα.</p>
       </blockquote>
       <div class="d-flex gap-3" data-aos="fade-up" data-aos-delay="200">
-        <a href="#signup-form" class="btn-get-started">Sign Up</a>
+        <a href="#signup-form" class="btn-get-started">Εγγραφή</a>
         <a href="{% url 'login' %}" class="btn-watch-video d-flex align-items-center">
-          <i class="bi bi-box-arrow-in-right"></i><span>Already have an account?</span>
+          <i class="bi bi-box-arrow-in-right"></i><span>Έχεις ήδη λογαριασμό;</span>
         </a>
       </div>
     </div>
@@ -31,7 +31,7 @@
     <div class="col-md-8 col-lg-6">
       <div class="card shadow">
         <div class="card-body p-4">
-          <h2 class="mb-4 text-center">Create an Account</h2>
+          <h2 class="mb-4 text-center">Δημιουργία Λογαριασμού</h2>
 
           <form method="post" novalidate>
             {% csrf_token %}
@@ -49,7 +49,7 @@
             {% endfor %}
 
             <div class="d-grid">
-              <button type="submit" class="btn btn-primary btn-lg">Sign Up</button>
+              <button type="submit" class="btn btn-primary btn-lg">Εγγραφή</button>
             </div>
           </form>
         </div>

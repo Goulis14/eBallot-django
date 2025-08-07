@@ -1,30 +1,25 @@
-# core/admin.py
-from django.contrib import admin, messages
+from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.admin import SimpleListFilter
-from django.utils import timezone
 from django.utils.html import format_html, format_html_join
 from django.urls import reverse
 
 from .models import Election, Candidate, Invitation, UserGroup
 from .forms import ElectionForm
-from .utils import generate_password, create_group_invitations, send_invitation_email
 
 # ──────────────────────────────────────────────
-#  Custom user model (AUTH_USER_MODEL)
+#  Custom user model
 # ──────────────────────────────────────────────
 CustomUser = get_user_model()
 
-# Remove the default registration Django adds automatically
 try:
     admin.site.unregister(CustomUser)
 except admin.sites.NotRegistered:
     pass
 
-
 # ──────────────────────────────────────────────
-#  Election-related inlines & admin
+#  Inlines
 # ──────────────────────────────────────────────
 class InvitationInline(admin.TabularInline):
     model = Invitation
@@ -32,87 +27,71 @@ class InvitationInline(admin.TabularInline):
     fields = ("email", "expires_at", "used")
     readonly_fields = ("used",)
 
-
 class CandidateInline(admin.TabularInline):
     model = Candidate
     extra = 1
 
-
+# ──────────────────────────────────────────────
+#  Election Admin
+# ──────────────────────────────────────────────
 @admin.register(Election)
 class ElectionAdmin(admin.ModelAdmin):
     form = ElectionForm
     inlines = [CandidateInline, InvitationInline]
     list_display = (
-        "title", "start_date", "end_date",
-        "is_public", "is_active", "max_choices",
-        "turnout_status",  # NEW
+        "title", "start_date", "end_date", "visibility",  "max_choices", "turnout_status"
     )
-    list_filter = ("is_public", "is_active")
+    list_filter = ("visibility",)
     search_fields = ("title", "description")
-    readonly_fields = ("password", "invitation_links")
+    readonly_fields = ("invitation_links", "generated_password_display")
 
-    # show generated invitation URLs
+    fieldsets = (
+        ("Βασικές Πληροφορίες", {
+            "fields": ("title", "description", "start_date", "end_date")
+        }),
+        ("Ρυθμίσεις Ορατότητας και Ασφάλειας", {
+            "fields": ("visibility", "password", "groups")
+        }),
+        ("Ορισμένος Κωδικός Πρόσβασης", {
+            "fields": ("generated_password_display",)
+        }),
+        ("Προσκλήσεις", {
+            "fields": ("invitation_links",)
+        }),
+        ("Επιλογές Ψηφοφορίας", {
+            "fields": ("max_choices",)
+        }),
+    )
+
+    def get_queryset(self, request):
+        self.request = request
+        return super().get_queryset(request)
+
+    def save_model(self, request, obj, form, change):
+        if not change or obj.created_by_id is None:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+
+        # Δημιουργία shared invitation αν είναι private και δεν υπάρχει ήδη
+        if obj.visibility == "private":
+            existing_shared = obj.invitations.filter(email__isnull=True).first()
+            if not existing_shared:
+                Invitation.objects.create(election=obj)
+
     def invitation_links(self, obj):
+        if not obj.pk:
+            return "Αποθήκευσε πρώτα την εκλογή για να δεις τις προσκλήσεις."
         invs = obj.invitations.all()
         if not invs:
-            return "No invitations yet."
+            return "Δεν υπάρχουν προσκλήσεις ακόμα."
         html = format_html_join(
             "\n",
             "<li><a href='{}' target='_blank'>{}</a></li>",
-            ((reverse("invitation_redeem", args=[inv.code]), inv.code) for inv in invs),
+            ((inv.link(self.request), inv.link(self.request)) for inv in invs),
         )
         return format_html("<ul>{}</ul>", html)
 
     invitation_links.short_description = "Invitation links"
-
-    # main save hook
-    def save_model(self, request, obj, form, change):
-        # 1️⃣ ensure NOT-NULL created_by
-        if not change or obj.created_by_id is None:
-            obj.created_by = request.user
-
-        # 2️⃣ first save (creates the DB row so PK exists)
-        super().save_model(request, obj, form, change)
-
-        # 3️⃣ public elections need no invitations
-        if obj.is_public:
-            return
-
-        # 4️⃣ generate password if requested and still empty
-        if form.cleaned_data.get("auto_password") and not obj.password:
-            obj.password = generate_password()
-            obj.save(update_fields=["password"])
-
-        # 5️⃣ create one Invitation per *group member*
-        create_group_invitations(obj)
-
-        # 6️⃣ send emails if requested
-        if form.cleaned_data.get("send_emails"):
-            for inv in obj.invitations.filter(used=False, email__isnull=False):
-                send_invitation_email(inv, request)
-            self.message_user(request, "Invitations saved and e-mails sent.", messages.SUCCESS)
-        else:
-            self.message_user(request, "Invitations saved (no e-mails).", messages.INFO)
-
-    actions = ["toggle_active", "end_election_now"]
-
-    @admin.action(description="Ενεργοποίηση / Απενεργοποίηση εκλογής")
-    def toggle_active(self, request, queryset):
-        updated = 0
-        for election in queryset:
-            election.is_active = not election.is_active
-            election.save(update_fields=["is_active"])
-            updated += 1
-        self.message_user(request, f"Ενημερώθηκαν {updated} εκλογές.")
-
-    @admin.action(description="Λήξη εκλογής τώρα")
-    def end_election_now(self, request, queryset):
-        now = timezone.now()
-        for election in queryset:
-            election.end_date = now
-            election.is_active = False
-            election.save(update_fields=["end_date", "is_active"])
-        self.message_user(request, "Η εκλογή λήχθηκε με επιτυχία.")
 
     def turnout_status(self, obj):
         voters = obj.voter_logs.count()
@@ -121,16 +100,23 @@ class ElectionAdmin(admin.ModelAdmin):
 
     turnout_status.short_description = "Συμμετοχή"
 
+    def generated_password_display(self, obj):
+        if obj.visibility == "public":
+            return "—"
+        if obj.password:
+            return obj.password
+        return "Δεν έχει οριστεί"
+
+    generated_password_display.short_description = "Ορισμένος Κωδικός"
 
 # ──────────────────────────────────────────────
-#  User ↔ Group helpers
+#  User ↔ Group Admin
 # ──────────────────────────────────────────────
 class UserGroupInline(admin.TabularInline):
-    model = UserGroup.members.through  # through table of the M2M
+    model = UserGroup.members.through
     extra = 0
     verbose_name = "Group membership"
     verbose_name_plural = "Groups"
-
 
 class UserGroupListFilter(SimpleListFilter):
     title = "group"
@@ -144,19 +130,14 @@ class UserGroupListFilter(SimpleListFilter):
             return queryset.filter(groups__id=self.value())
         return queryset
 
-
 @admin.register(CustomUser)
 class CustomUserAdmin(BaseUserAdmin):
     inlines = [UserGroupInline]
     list_filter = BaseUserAdmin.list_filter + (UserGroupListFilter,)
 
-
-# ──────────────────────────────────────────────
-#  Group screen itself
-# ──────────────────────────────────────────────
 @admin.register(UserGroup)
 class UserGroupAdmin(admin.ModelAdmin):
-    list_display = ("name", "created_by", "created_at", "member_count")
+    list_display = ("name", "member_count", "created_at", "created_by")
     search_fields = ("name",)
     filter_horizontal = ("members",)
 

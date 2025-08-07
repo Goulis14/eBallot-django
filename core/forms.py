@@ -2,33 +2,70 @@
 import json
 from typing import Optional
 
+from django.core.checks import messages
+from django.utils.translation import gettext_lazy as _
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.forms import inlineformset_factory
 from .models import CustomUser, Election, Candidate, Invitation, UserGroup
+from django import forms
+
 
 
 class SignUpForm(UserCreationForm):
-    first_name = forms.CharField(max_length=30, required=True,
-                                 widget=forms.TextInput(attrs={'placeholder': 'First Name'}))
-    last_name = forms.CharField(max_length=30, required=True,
-                                widget=forms.TextInput(attrs={'placeholder': 'Last Name'}))
-
-    email = forms.EmailField(required=True)
-    role = forms.ChoiceField(choices=CustomUser._meta.get_field('role').choices, required=True)
-    gender = forms.ChoiceField(choices=CustomUser.GENDER_CHOICES, required=True)
-    age_group = forms.ChoiceField(choices=CustomUser.AGE_GROUPS, required=True)
-
-    # We will set choices for these fields dynamically later
-    country = forms.ChoiceField(choices=[], required=True)
-
-    # region = forms.ChoiceField(choices=[], required=False)
+    first_name = forms.CharField(
+        max_length=30,
+        required=True,
+        label=_("Όνομα"),
+        widget=forms.TextInput(attrs={'placeholder': 'Όνομα'})
+    )
+    last_name = forms.CharField(
+        max_length=30,
+        required=True,
+        label=_("Επώνυμο"),
+        widget=forms.TextInput(attrs={'placeholder': 'Επώνυμο'})
+    )
+    email = forms.EmailField(
+        required=True,
+        label=_("Email")
+    )
+    password1 = forms.CharField(
+        label=_("Κωδικός πρόσβασης"),
+        widget=forms.PasswordInput(attrs={'placeholder': 'Κωδικός πρόσβασης'})
+    )
+    password2 = forms.CharField(
+        label=_("Επιβεβαίωση κωδικού"),
+        widget=forms.PasswordInput(attrs={'placeholder': 'Επιβεβαίωση κωδικού'})
+    )
+    gender = forms.ChoiceField(
+        choices=CustomUser.GENDER_CHOICES,
+        required=True,
+        label=_("Φύλο")
+    )
+    age_group = forms.ChoiceField(
+        choices=CustomUser.AGE_GROUPS,
+        required=True,
+        label=_("Ηλικιακή ομάδα")
+    )
+    country = forms.ChoiceField(
+        choices=[],
+        required=True,
+        label=_("Χώρα")
+    )
 
     class Meta:
         model = CustomUser
-        fields = ['username', "first_name", "last_name", 'email', 'password1', 'password2', 'role', 'gender',
-                  'age_group', 'country']
+        fields = [
+            'username', 'first_name', 'last_name',
+            'email', 'password1', 'password2',
+            'gender', 'age_group', 'country'
+        ]
+        labels = {
+            'username': _('Όνομα χρήστη'),
+            'password1': _('Κωδικός πρόσβασης'),
+            'password2': _('Επιβεβαίωση κωδικού πρόσβασης'),
+        }
 
     def __init__(self, *args, **kwargs):
         super(SignUpForm, self).__init__(*args, **kwargs)
@@ -38,46 +75,55 @@ class SignUpForm(UserCreationForm):
         with open("core/static/core/data/countries+states.json", "r", encoding="utf-8") as f:
             countries_data = json.load(f)
 
-        # Populate the 'country' dropdown with country names
-        self.fields['country'].choices = [(country_data['name'], country_data['name'])
-                                          for country_data in countries_data]
+        self.fields['country'].choices = [
+            (country_data['name'], country_data['name'])
+            for country_data in countries_data
+        ]
 
         # If the country is pre-selected, load regions for that country
         if 'country' in kwargs.get('data', {}):
             selected_country = kwargs['data']['country']
             for country_data in countries_data:
                 if country_data['name'] == selected_country:
-                    self.fields['region'].choices = [(region, region) for region in country_data['states']]
+                    self.fields['region'].choices = [
+                        (region, region) for region in country_data['states']
+                    ]
                     break
 
 
+
+
 class ElectionForm(forms.ModelForm):
-    # normal election fields …
-    is_public = forms.BooleanField(required=False, initial=True, label="Public election")
+    visibility = forms.ChoiceField(
+        choices=Election.VISIBILITY_CHOICES,
+        label="Ορατότητα Εκλογής"
+    )
+
     groups = forms.ModelMultipleChoiceField(
         queryset=UserGroup.objects.all(),
         required=False,
         widget=forms.CheckboxSelectMultiple,
-        label="Invite groups (if private)",
+        label="Ομάδες ψηφοφόρων (για ιδιωτικές εκλογές)",
     )
-    max_choices = forms.IntegerField(min_value=1, initial=1, label="Max choices per voter",
-                                     help_text="Πόσους υποψηφίους μπορεί να επιλέξει κάθε ψηφοφόρος")
+
     password = forms.CharField(
         required=False,
         widget=forms.PasswordInput,
-        help_text="Leave blank and tick auto-generate to get a random one.",
+        help_text="Προαιρετικός κωδικός πρόσβασης για την εκλογή.",
+        label="Κωδικός Πρόσβασης"
     )
 
-    # extra controls for the workflow
-    auto_password = forms.BooleanField(
-        required=False,
-        initial=False,
-        label="Generate a random password",
-    )
-    send_emails = forms.BooleanField(
-        required=False,
-        initial=True,
-        label="Send invitation e-mails immediately",
+    # send_emails = forms.BooleanField(
+    #     required=False,
+    #     initial=True,
+    #     label="Αποστολή προσκλήσεων μέσω email",
+    # )
+
+    max_choices = forms.IntegerField(
+        min_value=1,
+        initial=1,
+        label="Μέγιστες Επιλογές Ανά Ψηφοφόρο",
+        help_text="Πόσους υποψηφίους μπορεί να επιλέξει κάθε ψηφοφόρος"
     )
 
     class Meta:
@@ -85,35 +131,32 @@ class ElectionForm(forms.ModelForm):
         fields = [
             "title", "description",
             "start_date", "end_date",
-            "is_active", "is_public",
-            "password", "auto_password",
-            "groups", "send_emails", "max_choices",
+            "is_active", "visibility",
+            "password", "groups",  "max_choices",
         ]
 
-    # guard: private election must have *some* password
     def clean(self):
-        cleaned = super().clean()
+        cleaned_data = super().clean()
 
-        start = cleaned.get("start_date")
-        end = cleaned.get("end_date")
-        password = cleaned.get("password")
-        auto_pass = cleaned.get("auto_password")
-        is_public = cleaned.get("is_public")
-        candidates = self.instance.candidates.count()
-        max_choices = cleaned.get("max_choices")
+        visibility = cleaned_data.get("visibility")
+        start = cleaned_data.get("start_date")
+        end = cleaned_data.get("end_date")
+        max_choices = cleaned_data.get("max_choices")
 
+        # Έλεγχος ημερομηνιών
         if start and end and start >= end:
             raise forms.ValidationError("Η ημερομηνία λήξης πρέπει να είναι μετά την ημερομηνία έναρξης.")
 
-        if not is_public and not (password or auto_pass):
-            raise forms.ValidationError(
-                "Οι ιδιωτικές εκλογές πρέπει να έχουν κωδικό ή να ζητείται αυτόματη δημιουργία.")
+        # Δεν απαιτούνται πλέον groups για private elections!
 
+        # Έλεγχος μέγιστων επιλογών σε σχέση με τους υποψηφίους
+        candidates = self.instance.candidates.count() if self.instance.pk else 0
         if max_choices and candidates and max_choices > candidates:
             raise forms.ValidationError(
-                f"Το πλήθος επιλογών δεν μπορεί να ξεπερνά τους διαθέσιμους υποψηφίους ({candidates}).")
+                f"Το πλήθος επιλογών δεν μπορεί να ξεπερνά τους διαθέσιμους υποψηφίους ({candidates})."
+            )
 
-        return cleaned
+        return cleaned_data
 
 
 class CandidateForm(forms.ModelForm):
@@ -171,12 +214,32 @@ User = get_user_model()
 
 class EditProfileForm(forms.ModelForm):
     class Meta:
-        model = User
-        fields = ['first_name', 'last_name', 'email']  # adjust fields as you want editable
+        model = CustomUser
+        fields = [
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'gender',
+            'age_group',
+
+        ]
+        labels = {
+            'username': _('Όνομα χρήστη'),
+            'first_name': _('Όνομα'),
+            'last_name': _('Επώνυμο'),
+            'email': _('Email'),
+            'gender': _('Φύλο'),
+            'age_group': _('Ηλικιακή ομάδα'),
+
+        }
         widgets = {
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'gender': forms.Select(attrs={'class': 'form-control'}),
+            'age_group': forms.Select(attrs={'class': 'form-control'}),
         }
 
 
@@ -194,3 +257,16 @@ class GroupForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Group Name'}),
         }
+
+
+class CustomLoginForm(AuthenticationForm):
+    username = forms.CharField(
+        label=_("Όνομα χρήστη"),
+        widget=forms.TextInput(attrs={"autofocus": True, "class": "form-control", "placeholder": "Όνομα χρήστη"})
+    )
+    password = forms.CharField(
+        label=_("Κωδικός πρόσβασης"),
+        strip=False,
+        widget=forms.PasswordInput(
+            attrs={"autocomplete": "current-password", "class": "form-control", "placeholder": "Κωδικός πρόσβασης"}),
+    )

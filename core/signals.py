@@ -7,5 +7,5 @@ from .models import Election, Invitation
 
 @receiver(post_save, sender=Election)
 def create_invitation_no_email(sender, instance, created, **kwargs):
-    if created and not instance.is_public and instance.invitations.count() == 0:
+    if created and instance.visibility != 'public' and instance.invitations.count() == 0:
         Invitation.objects.create(election=instance)

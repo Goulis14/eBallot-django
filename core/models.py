@@ -81,19 +81,51 @@ class UserGroup(models.Model):
 
 
 class Election(models.Model):
-    title = models.CharField(max_length=255)
-    description = models.TextField()
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
-    is_active = models.BooleanField(default=False)
-    active_from = models.DateTimeField(null=True, blank=True)
-    total_voters = models.IntegerField(default=0)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    is_public = models.BooleanField(default=True)
-    password = models.CharField(max_length=128, blank=True, null=True)
-    groups = models.ManyToManyField(UserGroup, blank=True, related_name="elections")
-    max_choices = models.PositiveSmallIntegerField(default=1,
-                                                   help_text="Πόσες επιλογές επιτρέπονται σε κάθε ψηφοφόρο")
+    VISIBILITY_CHOICES = [
+        ('public', 'Δημόσια Εκλογή'),
+        ('private', 'Ιδιωτική Εκλογή'),
+    ]
+
+    title = models.CharField(max_length=255, verbose_name="Τίτλος")
+    description = models.TextField(verbose_name="Περιγραφή")
+    start_date = models.DateTimeField(verbose_name="Ημερομηνία Έναρξης")
+    end_date = models.DateTimeField(verbose_name="Ημερομηνία Λήξης")
+    is_active = models.BooleanField(default=False, verbose_name="Ενεργή")
+    active_from = models.DateTimeField(null=True, blank=True, verbose_name="Έγινε Ενεργή Από")
+    total_voters = models.IntegerField(default=0, verbose_name="Σύνολο Ψηφοφόρων")
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name="Δημιουργός"
+    )
+
+    visibility = models.CharField(
+        max_length=20,
+        choices=VISIBILITY_CHOICES,
+        default='public',
+        verbose_name="Ορατότητα Εκλογής"
+    )
+
+    password = models.CharField(
+        max_length=128,
+        blank=True,
+        null=True,
+        verbose_name="Κωδικός Πρόσβασης (αν απαιτείται)"
+    )
+
+    groups = models.ManyToManyField(
+        UserGroup,
+        blank=True,
+        related_name="elections",
+        verbose_name="Ομάδες Ψηφοφόρων"
+    )
+
+    max_choices = models.PositiveSmallIntegerField(
+        default=1,
+        help_text="Πόσες επιλογές επιτρέπονται σε κάθε ψηφοφόρο",
+        verbose_name="Μέγιστες Επιλογές Ανά Ψηφοφόρο"
+    )
 
     def calculate_total_voters(self):
         return self.vote_set.values('user').distinct().count()
@@ -150,7 +182,8 @@ class Invitation(models.Model):
         return path
 
     def is_valid(self):
-        if self.used:
+        # Αν είναι προσωποποιημένο και έχει χρησιμοποιηθεί -> άκυρο
+        if self.email and self.used:
             return False
         if self.expires_at and timezone.now() > self.expires_at:
             return False

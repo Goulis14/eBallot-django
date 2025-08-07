@@ -1,5 +1,6 @@
 # core/views.py
 import json
+from django.utils.translation import gettext_lazy as _
 from collections import defaultdict
 import logging
 from django.conf import settings
@@ -18,7 +19,7 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import ListView, View, FormView
 
-from .forms import ContactForm, EditProfileForm, SignUpForm, VoteForm
+from .forms import ContactForm, EditProfileForm, SignUpForm, VoteForm, CustomLoginForm
 from .models import (
     DemographicGroup,
     Election,
@@ -78,7 +79,9 @@ def signup_view(request):
     if request.method == "POST":
         form = SignUpForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)
+            user.role = "voter"
+            user.save()
             login(request, user)
 
             # redeem invitation if present
@@ -101,13 +104,13 @@ def signup_view(request):
 
 def login_view(request):
     if request.method == "POST":
-        form = AuthenticationForm(request, data=request.POST)
+        form = CustomLoginForm(request, data=request.POST)
         if form.is_valid():
             login(request, form.get_user())
             return redirect("home")
-        messages.error(request, "Invalid credentials.")
+        messages.error(request, "Λανθασμένα στοιχεία σύνδεσης.")
     else:
-        form = AuthenticationForm()
+        form = CustomLoginForm()
     return render(request, "core/registration/login.html", {"form": form})
 
 
@@ -127,19 +130,29 @@ class ElectionListView(ListView):
     context_object_name = "elections"
 
     def get_queryset(self):
-        u = self.request.user
-        if u.is_authenticated:
-            return (
-                Election.objects.filter(
-                    Q(is_public=True)
-                    | Q(groups__in=u.user_groups.all())
-                    | Q(invitations__used_by=u, invitations__used=True)
-                )
-                .distinct()
-                .order_by("-start_date")
-            )
-        return Election.objects.filter(is_public=True).order_by("-start_date")
+        user = self.request.user
+        now = timezone.now()
 
+        public_qs = Election.objects.filter(
+            visibility="public",
+            is_active=True,
+            start_date__lte=now,
+            end_date__gte=now
+        )
+
+        if user.is_authenticated:
+            private_qs = Election.objects.filter(
+                visibility="private",
+                is_active=True,
+                start_date__lte=now,
+                end_date__gte=now
+            ).filter(
+                Q(groups__members=user) |
+                Q(invitations__used_by=user, invitations__used=True)
+            )
+            return (public_qs | private_qs).distinct().order_by("-start_date")
+
+        return public_qs.order_by("-start_date")
 
 # ─────────────────────────────────────────────────────────
 #  Alert mix-in
@@ -160,34 +173,32 @@ class AlertLoginRequiredMixin(AccessMixin):
 
 
 class VoteView(LoginRequiredMixin, View):
-    """GET = render form · POST = cast vote"""
-
     def get(self, request, pk):
         election = get_object_or_404(Election, pk=pk)
 
-        # ---- access checks ----
-        if not election.is_public:
-            if election.password and not request.session.get(f"election_passed_{pk}"):
-                return redirect("election_password", pk=pk)
-
+        # ----- Έλεγχος ορατότητας -----
+        if election.visibility == "private":
             in_group = election.groups.filter(members=request.user).exists()
             invited = Invitation.objects.filter(
                 election=election, used_by=request.user, used=True
             ).exists()
+
             if not in_group and not invited:
-                messages.error(request, "Not allowed in this election.")
-                return redirect("election_list")
+                raise Http404("Η εκλογή δεν υπάρχει.")  # 👈 Εξαφάνιση, όχι μήνυμα
+
+            if election.password and not request.session.get(f"election_passed_{pk}"):
+                return redirect("election_password", pk=pk)
 
         now = timezone.now()
         if now < election.start_date or now > election.end_date:
-            messages.warning(request, "Election not active.")
+            messages.warning(request, "Η εκλογή δεν είναι ενεργή.")
             return redirect("election_list")
 
         if VoterLog.objects.filter(user=request.user, election=election, has_voted=True).exists():
-            messages.info(request, "You have already voted.")
+            messages.info(request, "Έχετε ήδη ψηφίσει.")
             return redirect("results", election_id=election.pk)
 
-        # ---- render form ----
+        # ----- Φόρμα -----
         q = request.GET.get("q", "")
         candidates = (
             election.candidates.filter(name__icontains=q) if q else election.candidates.all()
@@ -408,7 +419,7 @@ def invitation_redeem(request, code):
 
 def election_password(request, pk):
     election = get_object_or_404(Election, pk=pk)
-    if election.is_public:
+    if election.visibility == "public":
         return redirect("vote", pk=pk)
     if not election.password:
         return HttpResponseForbidden("This election has no password.")

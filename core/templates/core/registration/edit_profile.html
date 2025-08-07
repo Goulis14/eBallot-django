@@ -1,10 +1,9 @@
 {% extends "core/body.html" %}
 {% load static %}
 
-{% block title %}Edit Profile{% endblock %}
+{% block title %}Επεξεργασία Προφίλ{% endblock %}
 
 {% block content %}
-
 
 <section id="hero" class="hero section dark-background">
 
@@ -13,9 +12,9 @@
   <div class="container">
     <div class="row">
       <div class="col-xl-6" style="max-width: 450px; padding-right: 3rem;">
-        <h1 data-aos="fade-up">Edit Your Profile</h1>
+        <h1 data-aos="fade-up">Επεξεργασία Προφίλ</h1>
         <blockquote data-aos="fade-up" data-aos-delay="100">
-          <p>Update your profile information here.</p>
+          <p>Ενημέρωσε τα στοιχεία του προφίλ σου εδώ.</p>
         </blockquote>
       </div>
     </div>
@@ -28,7 +27,7 @@
     <div class="col-md-8 col-lg-6">
       <div class="card shadow">
         <div class="card-body p-4">
-          <h2 class="mb-4 text-center">Edit Profile</h2>
+          <h2 class="mb-4 text-center">Επεξεργασία Προφίλ</h2>
 
           <form method="post" novalidate>
             {% csrf_token %}
@@ -46,7 +45,7 @@
             {% endfor %}
 
             <div class="d-grid">
-              <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
+              <button type="submit" class="btn btn-primary btn-lg">Αποθήκευση Αλλαγών</button>
             </div>
           </form>
 
