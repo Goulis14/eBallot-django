@@ -6,12 +6,48 @@
 <main class="main">
 
   {% if receipt_salts %}
-    <div class="alert alert-success">
-      <h5>Απόδειξη της ψήφου σας</h5>
-      {% for s in receipt_salts %}
-        <code class="d-block">{{ s }}</code>
-      {% endfor %}
+  <div class="accordion my-4" id="receiptAccordion">
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingReceipts">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReceipts" aria-expanded="true" aria-controls="collapseReceipts">
+          🔐 Απόδειξη Ψήφου (Receipt Hash + Salt)
+        </button>
+      </h2>
+      <div id="collapseReceipts" class="accordion-collapse collapse show" aria-labelledby="headingReceipts" data-bs-parent="#receiptAccordion">
+        <div class="accordion-body">
+          <p>
+            Μετά την ψήφο σας, το σύστημα δημιούργησε έναν <strong>μοναδικό κωδικό απόδειξης (receipt hash)</strong>, που αποδεικνύει ότι η ψήφος σας έχει καταγραφεί με ασφάλεια.<br>
+            Παράλληλα, εμφανίζεται και ένα <strong>συμπληρωματικό στοιχείο (salt)</strong>, το οποίο βοηθά στην ενίσχυση της ασφάλειας.
+          </p>
+
+          <button class="btn btn-link p-0 mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#moreInfo" aria-expanded="false" aria-controls="moreInfo">
+            📘 Διαβάστε περισσότερα για τη λειτουργία τους
+          </button>
+
+          <div class="collapse" id="moreInfo">
+            <div class="card card-body bg-light border-0">
+              <p><strong>🔐 Τι είναι το Hash:</strong> Είναι ένας μοναδικός, μη αναστρέψιμος κωδικός που δημιουργείται από την ψήφο σας. Μοιάζει με "ψηφιακό αποτύπωμα". Χρησιμοποιείται για να μπορείτε να επαληθεύσετε ότι η ψήφος σας υπάρχει χωρίς να αποκαλύπτεται το περιεχόμενό της.</p>
+              <p><strong>🧂 Τι είναι το Salt:</strong> Είναι ένα επιπλέον τυχαίο δεδομένο που συνδυάζεται με την ψήφο πριν δημιουργηθεί το hash, ώστε ακόμα και ίδιες ψήφοι να έχουν διαφορετικά hashes. Προστατεύει από επιθέσεις συσχέτισης.</p>
+              <p><strong>✅ Πώς γίνεται η επαλήθευση:</strong> Αρκεί να εισαγάγετε μόνο τον κωδικό hash στη σελίδα <a href="{% url 'verify_receipt' election.id %}">"Έλεγχος της ψήφου μου"</a>. Το salt χρησιμοποιείται μόνο εσωτερικά για επαλήθευση από το σύστημα.</p>
+            </div>
+          </div>
+
+          <ul class="list-group mt-3">
+            {% for hash, salt in receipt_salts %}
+              <li class="list-group-item">
+                <strong>Hash:</strong> <code>{{ hash }}</code>
+                <span data-bs-toggle="tooltip" title="Ο κωδικός hash είναι η απόδειξη της ψήφου σας.">ℹ️</span><br>
+                <strong>Salt:</strong> <code>{{ salt }}</code>
+                <button class="btn btn-sm btn-outline-secondary float-end mt-2 copy-btn" data-hash="{{ hash }}" data-salt="{{ salt }}">
+                  Αντιγραφή
+                </button>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
     </div>
+  </div>
   {% endif %}
 
   <!-- Page title -->
@@ -42,8 +78,7 @@
         </a>
       </div>
     </section>
-console.log('candLabels raw →', candLabels, 'type', typeof candLabels);
-console.log('candVotes  raw →', candVotes,  'type', typeof candVotes);
+
     <!-- Results table -->
     <section class="mb-5">
       <div class="card shadow-sm p-4">
@@ -76,40 +111,50 @@ console.log('candVotes  raw →', candVotes,  'type', typeof candVotes);
     </div>
 
     <!-- Overall demographics -->
-    <div class="row mb-5">
-      {% if gender_labels_json|length > 2 %}
-        <div class="col-md-6 mb-4">
-          <div class="card shadow-sm p-4 h-100">
-            <h2 class="text-primary mb-3">👥 Ψήφοι ανά Φύλο (συνολικά)</h2>
-            <canvas id="genderChart"></canvas>
-          </div>
+   {% if show_demographics %}
+  <div class="row mb-5">
+    {% if gender_labels_json|length > 2 %}
+      <div class="col-md-6 mb-4">
+        <div class="card shadow-sm p-4 h-100">
+          <h2 class="text-primary mb-3">👥 Ψήφοι ανά Φύλο (συνολικά)</h2>
+          <canvas id="genderChart"></canvas>
         </div>
-      {% endif %}
-      {% if age_labels_json|length > 2 %}
-        <div class="col-md-6 mb-4">
-          <div class="card shadow-sm p-4 h-100">
-            <h2 class="text-primary mb-3">📊 Ψήφοι ανά Ηλικιακή Ομάδα (συνολικά)</h2>
-            <canvas id="ageChart"></canvas>
-          </div>
+      </div>
+    {% endif %}
+    {% if age_labels_json|length > 2 %}
+      <div class="col-md-6 mb-4">
+        <div class="card shadow-sm p-4 h-100">
+          <h2 class="text-primary mb-3">📊 Ψήφοι ανά Ηλικιακή Ομάδα (συνολικά)</h2>
+          <canvas id="ageChart"></canvas>
         </div>
-      {% endif %}
-    </div>
+      </div>
+    {% endif %}
+  </div>
 
-    <!-- Per-candidate breakdown -->
-    <div class="row mb-5">
-      <div class="col-12 mb-4">
-        <div class="card shadow-sm p-4">
-          <h2 class="text-primary mb-3">👤 Ανάλυση Φύλου ανά Υποψήφιο</h2>
-          <canvas id="genderPerCandidateChart"></canvas>
-        </div>
-      </div>
-      <div class="col-12 mb-4">
-        <div class="card shadow-sm p-4">
-          <h2 class="text-primary mb-3">📅 Ανάλυση Ηλικιών ανά Υποψήφιο</h2>
-          <canvas id="agePerCandidateChart"></canvas>
-        </div>
+  <!-- Ανάλυση ανά υποψήφιο -->
+  <div class="row mb-5">
+    <div class="col-12 mb-4">
+      <div class="card shadow-sm p-4">
+        <h2 class="text-primary mb-3">👤 Ανάλυση Φύλου ανά Υποψήφιο</h2>
+        <canvas id="genderPerCandidateChart"></canvas>
       </div>
     </div>
+    <div class="col-12 mb-4">
+      <div class="card shadow-sm p-4">
+        <h2 class="text-primary mb-3">📅 Ανάλυση Ηλικιών ανά Υποψήφιο</h2>
+        <canvas id="agePerCandidateChart"></canvas>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <div class="alert alert-warning my-4" role="alert">
+    <p>
+      🔒 Για λόγους προστασίας της ανωνυμίας και αποφυγής στίγματος,
+      τα δημογραφικά στατιστικά δεν εμφανίζονται όταν οι ψήφοι είναι λιγότερες από
+      <strong>{{ demo_k_anon }}</strong>.
+    </p>
+  </div>
+{% endif %}
 
   </div><!-- /.container -->
 </main>
@@ -140,9 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const aCounts    = getJSON('js-age-counts');
   const genderData = getJSON('js-gender-per-cand');
   const ageData    = getJSON('js-age-per-cand');
-
-  console.log('candLabels →', candLabels, 'type', typeof candLabels);
-  console.log('candVotes  →', candVotes,  'type', typeof candVotes);
 
   Chart.register(ChartDataLabels);
 
@@ -215,6 +257,24 @@ document.addEventListener('DOMContentLoaded', () => {
     type: 'bar',
     data: { labels: candidates, datasets: ageDatasets },
     options: stackedOpts
+  });
+
+  // Tooltip ενεργοποίηση
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+  tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
+});
+</script>
+
+<script>
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const hash = btn.getAttribute('data-hash');
+    const salt = btn.getAttribute('data-salt');
+    const text = `Hash: ${hash}\nSalt: ${salt}`;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.innerText = '✅ Αντιγράφηκε!';
+      setTimeout(() => { btn.innerText = 'Αντιγραφή'; }, 2000);
+    });
   });
 });
 </script>

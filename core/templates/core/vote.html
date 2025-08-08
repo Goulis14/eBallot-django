@@ -44,6 +44,36 @@
               </button>
             </form>
 
+            <!-- Αποδείξεις Ψήφου (hash & salt) -->
+            {% if user_votes %}
+              <div class="mt-5">
+                <h5 class="fw-bold mb-3">Οι αποδείξεις της ψήφου σου</h5>
+                <p class="text-muted">Μπορείς να επαληθεύσεις τις ψήφους σου <a href="{% url 'verify_receipt' election.id %}">εδώ</a>.</p>
+
+                <div class="accordion" id="receiptAccordion">
+                  {% for vote in user_votes %}
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false"
+                                aria-controls="collapse{{ forloop.counter }}">
+                          Ψήφος {{ forloop.counter }} – Υποψήφιος: {{ vote.candidate.name }}
+                        </button>
+                      </h2>
+                      <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse"
+                           aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#receiptAccordion">
+                        <div class="accordion-body">
+                          <p><strong>Hash:</strong> <code>{{ vote.receipt_hash }}</code></p>
+                          <p><strong>Salt:</strong> <code>{{ vote.salt }}</code></p>
+                          <p class="text-muted small">Αποθήκευσε αυτά τα στοιχεία για να επαληθεύσεις τη ψήφο σου αργότερα.</p>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+
             {% if results %}
             <div class="mt-5">
               <h4>Αποτελέσματα:</h4>

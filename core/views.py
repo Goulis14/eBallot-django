@@ -18,7 +18,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import ListView, View, FormView
-
+from django.conf import settings
 from .forms import ContactForm, EditProfileForm, SignUpForm, VoteForm, CustomLoginForm
 from .models import (
     DemographicGroup,
@@ -135,7 +135,6 @@ class ElectionListView(ListView):
 
         public_qs = Election.objects.filter(
             visibility="public",
-            is_active=True,
             start_date__lte=now,
             end_date__gte=now
         )
@@ -143,7 +142,6 @@ class ElectionListView(ListView):
         if user.is_authenticated:
             private_qs = Election.objects.filter(
                 visibility="private",
-                is_active=True,
                 start_date__lte=now,
                 end_date__gte=now
             ).filter(
@@ -176,7 +174,6 @@ class VoteView(LoginRequiredMixin, View):
     def get(self, request, pk):
         election = get_object_or_404(Election, pk=pk)
 
-        # ----- Έλεγχος ορατότητας -----
         if election.visibility == "private":
             in_group = election.groups.filter(members=request.user).exists()
             invited = Invitation.objects.filter(
@@ -184,7 +181,7 @@ class VoteView(LoginRequiredMixin, View):
             ).exists()
 
             if not in_group and not invited:
-                raise Http404("Η εκλογή δεν υπάρχει.")  # 👈 Εξαφάνιση, όχι μήνυμα
+                raise Http404("Η εκλογή δεν υπάρχει.")
 
             if election.password and not request.session.get(f"election_passed_{pk}"):
                 return redirect("election_password", pk=pk)
@@ -195,14 +192,18 @@ class VoteView(LoginRequiredMixin, View):
             return redirect("election_list")
 
         if VoterLog.objects.filter(user=request.user, election=election, has_voted=True).exists():
-            messages.info(request, "Έχετε ήδη ψηφίσει.")
+            user_votes = Vote.objects.filter(
+                election=election,
+                demographic_group__age_group=request.user.age_group,
+                demographic_group__gender=request.user.gender,
+                demographic_group__country=request.user.country,
+            ).values_list("receipt_hash", "salt")
+            request.session["receipt_salts"] = list(user_votes)
+            messages.info(request, "Έχετε ήδη ψηφίσει σε αυτή την εκλογή.")
             return redirect("results", election_id=election.pk)
 
-        # ----- Φόρμα -----
         q = request.GET.get("q", "")
-        candidates = (
-            election.candidates.filter(name__icontains=q) if q else election.candidates.all()
-        )
+        candidates = election.candidates.filter(name__icontains=q) if q else election.candidates.all()
         form = VoteForm(election=election)
         ctx = {
             "election": election,
@@ -216,7 +217,7 @@ class VoteView(LoginRequiredMixin, View):
         election = get_object_or_404(Election, pk=pk)
         form = VoteForm(request.POST, election=election)
         if not form.is_valid():
-            messages.error(request, "Invalid vote.")
+            messages.error(request, "Το έντυπο της ψήφου δεν ήταν έγκυρο.")
             return redirect("vote", pk=pk)
 
         try:
@@ -225,7 +226,7 @@ class VoteView(LoginRequiredMixin, View):
                     user=request.user, election=election
                 )
                 if log.has_voted:
-                    messages.error(request, "You have already voted.")
+                    messages.error(request, "Έχετε ήδη ψηφίσει σε αυτή την εκλογή.")
                     return redirect("results", election_id=pk)
 
                 demo, _ = DemographicGroup.objects.get_or_create(
@@ -234,7 +235,7 @@ class VoteView(LoginRequiredMixin, View):
                     country=request.user.country,
                 )
 
-                salts = []
+                receipts = []
                 for cand in form.cleaned_data["candidates"]:
                     salt, rhash = generate_vote_receipt(cand.id, election.id)
                     Vote.objects.create(
@@ -242,20 +243,19 @@ class VoteView(LoginRequiredMixin, View):
                         candidate=cand,
                         demographic_group=demo,
                         receipt_hash=rhash,
+                        salt=salt,
                     )
-                    salts.append(salt)
+                    receipts.append((rhash, salt))
 
                 log.has_voted = True
                 log.save(update_fields=["has_voted"])
         except IntegrityError:
-            messages.error(request, "DB error while voting.")
+            messages.error(request, "Παρουσιάστηκε σφάλμα κατά την αποθήκευση της ψήφου.")
             return redirect("vote", pk=pk)
 
-        # send receipts to session
-        request.session["last_vote_salts"] = salts
-        messages.success(request, "Vote recorded anonymously.")
+        request.session["receipt_salts"] = receipts
+        messages.success(request, "Η ψήφος σας καταχωρήθηκε με επιτυχία και ανώνυμα.")
         return redirect("results", election_id=pk)
-
 
 # ─────────────────────────────────────────────────────────
 #  Profile
@@ -284,33 +284,28 @@ AGE_CATS = ["18-25", "26-35", "36-45", "46-60", "60+", "Unknown"]
 
 
 def results(request, election_id):
-    """Render the public results page with global + demographic charts."""
     election = get_object_or_404(Election, pk=election_id)
     total_votes = Vote.objects.filter(election=election).count()
     total_voters = VoterLog.objects.filter(election=election).count()
-
-    # ── turnout summary ───────────────────────────────────
+    show_demographics = total_votes >= settings.DEMO_K_ANON
     if election.max_choices > 1:
-        voters_voted = VoterLog.objects.filter(
-            election=election, has_voted=True
-        ).count()
+        voters_voted = VoterLog.objects.filter(election=election, has_voted=True).count()
         turnout_pct = round((voters_voted / total_voters) * 100, 2) if total_voters else 0
         turnout_text = {
-            "label_1": "Total Voters Invited",
-            "label_2": "Voters Who Voted",
-            "label_3": "Turnout Percentage",
+            "label_1": "Συνολικοί Ψηφοφόροι",
+            "label_2": "Ψηφίσαντες",
+            "label_3": "Ποσοστό Συμμετοχής",
             "voters_voted": voters_voted,
         }
     else:
         turnout_pct = round((total_votes / total_voters) * 100, 2) if total_voters else 0
         turnout_text = {
-            "label_1": "Total Voters",
-            "label_2": "Votes Cast",
-            "label_3": "Turnout Percentage",
+            "label_1": "Συνολικοί Ψηφοφόροι",
+            "label_2": "Ψήφοι",
+            "label_3": "Ποσοστό Συμμετοχής",
             "voters_voted": total_votes,
         }
 
-    # ── votes per candidate ───────────────────────────────
     cand_votes_qs = (
         Vote.objects.filter(election=election)
         .values("candidate__id", "candidate__name")
@@ -327,15 +322,12 @@ def results(request, election_id):
         for r in cand_votes_qs
     ]
 
-    # ── demographic breakdown (overall + per-candidate) ──
     gender_counts = defaultdict(int)
     age_counts = defaultdict(int)
     gender_per_candidate = defaultdict(lambda: defaultdict(int))
     age_per_candidate = defaultdict(lambda: defaultdict(int))
 
-    votes = Vote.objects.filter(election=election).select_related(
-        "candidate", "demographic_group"
-    )
+    votes = Vote.objects.filter(election=election).select_related("candidate", "demographic_group")
     for v in votes:
         if not v.demographic_group:
             continue
@@ -347,9 +339,10 @@ def results(request, election_id):
         gender_per_candidate[c][g] += 1
         age_per_candidate[c][a] += 1
 
-    # Keep the overall label order tidy
     gender_labels = [g for g in GENDER_CATS if gender_counts[g] > 0]
     age_labels = [a for a in AGE_CATS if age_counts[a] > 0]
+
+    receipt_salts = request.session.pop("receipt_salts", [])
 
     ctx = {
         "election": election,
@@ -358,9 +351,7 @@ def results(request, election_id):
         "total_voters": total_voters,
         "turnout_percentage": turnout_pct,
         "turnout_text": turnout_text,
-        "receipt_salts": request.session.pop("last_vote_salts", None),
-
-        # ── JSON blobs (safe-escaped in template) ─────────
+        "receipt_salts": receipt_salts,
         "results_labels_json": [r["name"] for r in results_list],
         "results_votes_json": [r["votes"] for r in results_list],
         "gender_labels_json": gender_labels,
@@ -369,9 +360,10 @@ def results(request, election_id):
         "age_counts_json": [age_counts[a] for a in age_labels],
         "gender_per_candidate_json": gender_per_candidate,
         "age_per_candidate_json": age_per_candidate,
+        "show_demographics": show_demographics,
+        "demo_k_anon": settings.DEMO_K_ANON,
     }
     return render(request, "core/results.html", ctx)
-
 
 # ─────────────────────────────────────────────────────────
 #  Edit profile

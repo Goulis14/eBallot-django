@@ -12,7 +12,9 @@
         <li><a href="{% url 'home' %}" class="active">Αρχική</a></li>
         <li><a href="{% url 'about' %}">Σχετικά</a></li>
         <li><a href="{% url 'services' %}">Υπηρεσίες</a></li>
+        {% if user.is_authenticated %}
         <li><a href="{% url 'profile' %}">Προφίλ</a></li>
+        {% endif %}
         <li><a href="{% url 'team' %}">Ομάδα</a></li>
         <li><a href="{% url 'election_list' %}">Εκλογές</a></li>
         <li><a href="{% url 'contact' %}">Επικοινωνία</a></li>

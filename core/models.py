@@ -157,8 +157,8 @@ class Vote(models.Model):
     candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE)
     demographic_group = models.ForeignKey(DemographicGroup, on_delete=models.SET_NULL, null=True)
     receipt_hash = models.CharField(max_length=64, unique=True, editable=False)
+    salt = models.CharField(max_length=32, editable=False)
     timestamp = models.DateTimeField(auto_now_add=True)
-
 
 class Invitation(models.Model):
     election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name='invitations')
