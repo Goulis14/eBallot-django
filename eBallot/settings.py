@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import dj_database_url  # <-- add this
 from pathlib import Path
 
 
@@ -146,3 +146,52 @@ STATIC_URL = "/static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# Heroku additions (non-destructive)
+# --------------------------
+import os
+import dj_database_url  # already imported above; safe to import again
+
+# 1) Override secrets & debug from environment (keeps your dev defaults above)
+SECRET_KEY = os.environ.get("SECRET_KEY", SECRET_KEY)
+DEBUG = os.environ.get("DEBUG", str(DEBUG)).lower() == "true"
+
+# 2) Hosts & CSRF (set these in Heroku config vars)
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", ",".join(ALLOWED_HOSTS or [])).split(",") if ALLOWED_HOSTS is not None else ["*"]
+CSRF_TRUSTED_ORIGINS = [
+    os.environ.get("CSRF_TRUSTED_ORIGIN", "").strip()
+] if os.environ.get("CSRF_TRUSTED_ORIGIN") else []
+
+# 3) WhiteNoise for static files (insert into middleware without editing the list)
+try:
+    MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
+except Exception:
+    # If MIDDLEWARE is not defined for some reason, skip
+    pass
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# 4) Database: keep sqlite locally, auto-swap to Postgres on Heroku via DATABASE_URL
+DATABASES["default"] = dj_database_url.config(
+    default=f"sqlite:///{DATABASES['default']['NAME']}",
+    conn_max_age=600,
+    ssl_require=bool(os.environ.get("DYNO")),  # True on Heroku dynos
+)
+
+# 5) Email via env (don’t hardcode secrets in code)
+EMAIL_HOST = os.environ.get("EMAIL_HOST", EMAIL_HOST)
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", EMAIL_PORT))
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", str(EMAIL_USE_TLS)).lower() == "true"
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", EMAIL_HOST_USER)
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", EMAIL_HOST_PASSWORD)
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", DEFAULT_FROM_EMAIL)
+CONTACT_EMAIL = DEFAULT_FROM_EMAIL
+
+# 6) Production security (only when DEBUG=False)
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT", "True").lower() == "true"
